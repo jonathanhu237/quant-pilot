@@ -7,6 +7,10 @@ This project uses a structured Claude + Codex collaboration loop. All participan
 - **Claude:** planning, code review, committing
 - **Codex:** implementation, execution summary
 
+### Parallelism
+
+Both Claude and Codex should maximize use of parallel agents whenever tasks are independent. Do not execute sequentially what can be done concurrently — spawn multiple agents in parallel for exploration, implementation, or review sub-tasks where there are no dependencies between them.
+
 ### Loop
 
 ```
@@ -20,7 +24,6 @@ Claude → PLAN.md → Codex → SUMMARY.md → Claude → REVIEW.md → Codex (
    - Describe **intent and constraints**, not implementation details. Do not paste code snippets into the plan — let Codex decide how to implement. Overly prescriptive plans cause Codex to copy-paste rather than reason.
 
 2. **Codex implements** according to `PLAN.md`, then writes `SUMMARY.md` to the project root.
-   - When the plan contains independent tasks, spawn multiple agents in parallel to execute them concurrently. Do not execute independent tasks sequentially.
    - `SUMMARY.md` must cover: what was done, what was verified, any blockers or deviations from the plan.
 
 3. **Claude reviews** the implementation against `PLAN.md` and `SUMMARY.md`, then writes `REVIEW.md` to the project root.
