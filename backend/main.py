@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
+from routers.market import router as market_router
 from routers.watchlist import router as watchlist_router
 
 
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(market_router, prefix="/api/market", tags=["market"])
 app.include_router(watchlist_router, prefix="/api/watchlist", tags=["watchlist"])
 
 
