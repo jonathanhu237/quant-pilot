@@ -8,6 +8,40 @@ export type StockQuote = {
   change_amount: number;
 };
 
+export type StrategyParameterDefinition = {
+  name: string;
+  type: 'integer' | 'float';
+  default: number;
+  min: number | null;
+  max: number | null;
+  step: number | null;
+};
+
+export type StrategyMeta = {
+  id: string;
+  name: string;
+  description: string;
+  parameters: StrategyParameterDefinition[];
+};
+
+export type BacktestRequest = {
+  strategy_id: string;
+  symbol: string;
+  start_date: string;
+  end_date: string;
+  params: Record<string, number>;
+};
+
+export type BacktestResult = {
+  strategy_id: string;
+  symbol: string;
+  annual_return: number;
+  max_drawdown: number;
+  win_rate: number;
+  sharpe_ratio: number;
+  total_trades: number;
+};
+
 type WatchlistItem = {
   symbol: string;
 };
@@ -78,4 +112,15 @@ export async function getQuotes(symbols: string[]): Promise<StockQuote[]> {
 
   const query = encodeURIComponent(symbols.join(','));
   return request<StockQuote[]>(`/api/market/quotes?symbols=${query}`);
+}
+
+export async function getStrategies(): Promise<StrategyMeta[]> {
+  return request<StrategyMeta[]>('/api/strategy/');
+}
+
+export async function runBacktest(payload: BacktestRequest): Promise<BacktestResult> {
+  return request<BacktestResult>('/api/strategy/backtest', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }

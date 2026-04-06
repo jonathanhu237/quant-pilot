@@ -32,8 +32,55 @@
     }
   },
   "strategy": {
-    "title": "Strategy",
-    "subtitle": "Strategy descriptions, parameters, and backtest results."
+    "title": "Strategy Center",
+    "subtitle": "Explore built-in quant strategies, configure parameters, and run quick backtests.",
+    "loading": "Loading strategies...",
+    "runBacktest": "Run backtest",
+    "configureTitle": "Configure {{name}}",
+    "symbolLabel": "A-share symbol",
+    "symbolPlaceholder": "600519",
+    "rangeLabel": "Time range",
+    "ranges": {
+      "1y": "1Y",
+      "3y": "3Y",
+      "5y": "5Y"
+    },
+    "parametersLabel": "Parameters",
+    "run": "Run",
+    "running": "Running...",
+    "resultsTitle": "Backtest results",
+    "metrics": {
+      "annualReturn": "Annual Return",
+      "maxDrawdown": "Max Drawdown",
+      "winRate": "Win Rate",
+      "sharpeRatio": "Sharpe Ratio",
+      "totalTrades": "Total Trades"
+    },
+    "errors": {
+      "load": "Failed to load strategy metadata.",
+      "run": "Failed to run backtest.",
+      "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
+      "invalidParam": "Please enter a valid value for {{param}}."
+    },
+    "strategies": {
+      "dual_ma": {
+        "name": "Dual Moving Average",
+        "description": "Buy when the short moving average crosses above the long moving average, and sell on the reverse crossover.",
+        "params": {
+          "short_window": "Short window",
+          "long_window": "Long window"
+        }
+      },
+      "rsi": {
+        "name": "RSI Overbought/Oversold",
+        "description": "Buy when RSI enters oversold territory and sell when it moves into overbought territory.",
+        "params": {
+          "period": "RSI period",
+          "oversold": "Oversold threshold",
+          "overbought": "Overbought threshold"
+        }
+      }
+    }
   },
   "paperTrading": {
     "title": "Paper Trading",

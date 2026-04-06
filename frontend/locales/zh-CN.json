@@ -32,8 +32,55 @@
     }
   },
   "strategy": {
-    "title": "策略",
-    "subtitle": "展示策略介绍、参数设置和回测结果。"
+    "title": "策略中心",
+    "subtitle": "查看内置量化策略、配置参数，并快速运行回测。",
+    "loading": "正在加载策略...",
+    "runBacktest": "运行回测",
+    "configureTitle": "配置 {{name}}",
+    "symbolLabel": "股票代码",
+    "symbolPlaceholder": "600519",
+    "rangeLabel": "时间范围",
+    "ranges": {
+      "1y": "近 1 年",
+      "3y": "近 3 年",
+      "5y": "近 5 年"
+    },
+    "parametersLabel": "策略参数",
+    "run": "运行",
+    "running": "运行中...",
+    "resultsTitle": "回测结果",
+    "metrics": {
+      "annualReturn": "年化收益",
+      "maxDrawdown": "最大回撤",
+      "winRate": "胜率",
+      "sharpeRatio": "夏普比率",
+      "totalTrades": "总交易次数"
+    },
+    "errors": {
+      "load": "加载策略元数据失败。",
+      "run": "运行回测失败。",
+      "invalidSymbol": "请输入有效的 6 位 A 股代码。",
+      "invalidParam": "请为 {{param}} 输入有效参数值。"
+    },
+    "strategies": {
+      "dual_ma": {
+        "name": "双均线交叉",
+        "description": "短期均线上穿长期均线时买入，反向下穿时卖出。",
+        "params": {
+          "short_window": "短期均线周期",
+          "long_window": "长期均线周期"
+        }
+      },
+      "rsi": {
+        "name": "RSI 超买超卖",
+        "description": "RSI 进入超卖区域时买入，进入超买区域时卖出。",
+        "params": {
+          "period": "RSI 周期",
+          "oversold": "超卖阈值",
+          "overbought": "超买阈值"
+        }
+      }
+    }
   },
   "paperTrading": {
     "title": "模拟交易",
