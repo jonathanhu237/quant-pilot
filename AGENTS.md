@@ -20,6 +20,7 @@ Claude → PLAN.md → Codex → SUMMARY.md → Claude → REVIEW.md → Codex (
    - Describe **intent and constraints**, not implementation details. Do not paste code snippets into the plan — let Codex decide how to implement. Overly prescriptive plans cause Codex to copy-paste rather than reason.
 
 2. **Codex implements** according to `PLAN.md`, then writes `SUMMARY.md` to the project root.
+   - When the plan contains independent tasks, spawn multiple agents in parallel to execute them concurrently. Do not execute independent tasks sequentially.
    - `SUMMARY.md` must cover: what was done, what was verified, any blockers or deviations from the plan.
 
 3. **Claude reviews** the implementation against `PLAN.md` and `SUMMARY.md`, then writes `REVIEW.md` to the project root.
