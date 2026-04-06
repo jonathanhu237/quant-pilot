@@ -17,6 +17,7 @@ Claude → PLAN.md → Codex → SUMMARY.md → Claude → REVIEW.md → Codex (
 
 1. **Claude writes `PLAN.md`** to the project root before any implementation begins.
    - Must include: context, goal, file-level change list, verification steps.
+   - Describe **intent and constraints**, not implementation details. Do not paste code snippets into the plan — let Codex decide how to implement. Overly prescriptive plans cause Codex to copy-paste rather than reason.
 
 2. **Codex implements** according to `PLAN.md`, then writes `SUMMARY.md` to the project root.
    - `SUMMARY.md` must cover: what was done, what was verified, any blockers or deviations from the plan.
