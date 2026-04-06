@@ -1,0 +1,50 @@
+{
+  "tabs": {
+    "home": "Home",
+    "market": "Market",
+    "strategy": "Strategy",
+    "trading": "Trading",
+    "ai": "AI"
+  },
+  "home": {
+    "title": "Quant Pilot",
+    "subtitle": "Strategy highlights and daily summary."
+  },
+  "market": {
+    "title": "Market",
+    "subtitle": "Track your A-share watchlist in real time.",
+    "loading": "Loading market data...",
+    "emptyTitle": "No symbols yet",
+    "emptySubtitle": "Add a 6-digit A-share code to start tracking quotes.",
+    "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
+    "modalTitle": "Add A-share Symbol",
+    "symbolPlaceholder": "600519",
+    "cancel": "Cancel",
+    "add": "Add",
+    "adding": "Adding...",
+    "delete": "Delete",
+    "quoteUnavailable": "Quote unavailable",
+    "errors": {
+      "load": "Failed to load market data.",
+      "refresh": "Failed to refresh market data.",
+      "add": "Failed to add symbol.",
+      "delete": "Failed to delete symbol."
+    }
+  },
+  "strategy": {
+    "title": "Strategy",
+    "subtitle": "Strategy descriptions, parameters, and backtest results."
+  },
+  "paperTrading": {
+    "title": "Paper Trading",
+    "subtitle": "Simulate trades and track portfolio performance."
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "subtitle": "Ask questions about strategies and portfolio performance."
+  },
+  "modal": {
+    "title": "This is a modal",
+    "link": "Go to home screen"
+  }
+}

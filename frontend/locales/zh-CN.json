@@ -1,0 +1,50 @@
+{
+  "tabs": {
+    "home": "首页",
+    "market": "行情",
+    "strategy": "策略",
+    "trading": "交易",
+    "ai": "AI"
+  },
+  "home": {
+    "title": "量化飞行员",
+    "subtitle": "策略亮点与每日摘要。"
+  },
+  "market": {
+    "title": "行情",
+    "subtitle": "实时追踪你的 A 股自选股。",
+    "loading": "正在加载行情数据...",
+    "emptyTitle": "还没有自选股",
+    "emptySubtitle": "添加一个 6 位 A 股代码开始追踪行情。",
+    "invalidSymbol": "请输入有效的 6 位 A 股代码。",
+    "modalTitle": "添加 A 股代码",
+    "symbolPlaceholder": "600519",
+    "cancel": "取消",
+    "add": "添加",
+    "adding": "添加中...",
+    "delete": "删除",
+    "quoteUnavailable": "暂无行情",
+    "errors": {
+      "load": "加载行情数据失败。",
+      "refresh": "刷新行情数据失败。",
+      "add": "添加股票失败。",
+      "delete": "删除股票失败。"
+    }
+  },
+  "strategy": {
+    "title": "策略",
+    "subtitle": "展示策略介绍、参数设置和回测结果。"
+  },
+  "paperTrading": {
+    "title": "模拟交易",
+    "subtitle": "模拟买卖并跟踪组合表现。"
+  },
+  "ai": {
+    "title": "AI 助手",
+    "subtitle": "就策略和组合表现提出问题。"
+  },
+  "modal": {
+    "title": "这是一个弹窗",
+    "link": "返回首页"
+  }
+}

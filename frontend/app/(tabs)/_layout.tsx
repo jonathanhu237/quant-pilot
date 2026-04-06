@@ -1,31 +1,42 @@
 import { Tabs } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { t } = useTranslation();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        sceneStyle: {
+          backgroundColor: '#0F0F14',
+        },
+        tabBarStyle: {
+          backgroundColor: '#0F0F14',
+          borderTopColor: 'rgba(255,255,255,0.08)',
+        },
+        tabBarInactiveTintColor: '#8B8B9E',
+        tabBarActiveTintColor: '#5E6AD2',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="market"
         options={{
-          title: 'Market',
+          title: t('tabs.market'),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="chart.line.uptrend.xyaxis" color={color} />
           ),
@@ -34,14 +45,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="strategy"
         options={{
-          title: 'Strategy',
+          title: t('tabs.strategy'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="lightbulb.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="paper-trading"
         options={{
-          title: 'Trading',
+          title: t('tabs.trading'),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />
           ),
@@ -50,7 +61,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ai"
         options={{
-          title: 'AI',
+          title: t('tabs.ai'),
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={28}

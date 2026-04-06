@@ -1,32 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
   RefreshControl,
-  StyleSheet,
+  Text,
   TextInput,
   View,
 } from 'react-native';
-
-import { ThemedText } from '@/components/themed-text';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { addToWatchlist, getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { addToWatchlist, getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
 
 type MarketRow = {
   symbol: string;
   name: string;
   price: number | null;
-  change_pct: number | null;
+  changePct: number | null;
 };
 
 export default function MarketScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const palette = Colors[colorScheme];
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [rows, setRows] = useState<MarketRow[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,70 +33,47 @@ export default function MarketScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadMarket() {
+  const loadMarket = useCallback(async () => {
     setError(null);
     const symbols = await getWatchlist();
-    const nextQuotes = await getQuotes(symbols);
-    const quoteMap = new Map(nextQuotes.map((quote) => [quote.symbol, quote]));
+    const quotes = await getQuotes(symbols);
+    const quoteMap = new Map(quotes.map((quote) => [quote.symbol, quote]));
+
     setRows(
       symbols.map((symbol) => {
         const quote = quoteMap.get(symbol);
         return {
           symbol,
-          name: quote?.name ?? 'Quote unavailable',
+          name: quote?.name ?? t('market.quoteUnavailable'),
           price: quote?.price ?? null,
-          change_pct: quote?.change_pct ?? null,
+          changePct: quote?.change_pct ?? null,
         };
       })
     );
-  }
+  }, [t]);
 
   useEffect(() => {
     async function initialize() {
       try {
         await loadMarket();
       } catch (loadError) {
-        const message = loadError instanceof Error ? loadError.message : 'Failed to load market data.';
-        setError(message);
+        setError(loadError instanceof Error ? loadError.message : t('market.errors.load'));
       } finally {
         setLoading(false);
       }
     }
 
-    initialize();
-  }, []);
+    void initialize();
+  }, [loadMarket, t]);
 
   async function refresh() {
     setRefreshing(true);
     try {
       await loadMarket();
     } catch (loadError) {
-      const message = loadError instanceof Error ? loadError.message : 'Failed to refresh market data.';
-      setError(message);
+      setError(loadError instanceof Error ? loadError.message : t('market.errors.refresh'));
     } finally {
       setRefreshing(false);
-    }
-  }
-
-  async function handleAddSymbol() {
-    const symbol = newSymbol.trim();
-    if (!/^\d{6}$/.test(symbol)) {
-      setModalError('Please enter a valid 6-digit A-share symbol.');
-      return;
-    }
-
-    setModalError(null);
-    setSubmitting(true);
-    try {
-      await addToWatchlist(symbol);
-      setModalVisible(false);
-      setNewSymbol('');
-      await loadMarket();
-    } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : 'Failed to add symbol.';
-      setError(message);
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -109,164 +83,163 @@ export default function MarketScreen() {
     setModalError(null);
   }
 
+  async function handleAddSymbol() {
+    const symbol = newSymbol.trim();
+
+    if (!/^\d{6}$/.test(symbol)) {
+      setModalError(t('market.invalidSymbol'));
+      return;
+    }
+
+    setModalError(null);
+    setSubmitting(true);
+
+    try {
+      await addToWatchlist(symbol);
+      closeModal();
+      await loadMarket();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : t('market.errors.add'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function handleDeleteSymbol(symbol: string) {
     try {
       await removeFromWatchlist(symbol);
       await loadMarket();
     } catch (deleteError) {
-      const message =
-        deleteError instanceof Error ? deleteError.message : 'Failed to delete symbol.';
-      setError(message);
+      setError(deleteError instanceof Error ? deleteError.message : t('market.errors.delete'));
     }
   }
 
-  function getChangeColor(changePct: number | null) {
+  function getChangeClass(changePct: number | null) {
+    if (changePct === null || changePct === 0) {
+      return 'text-secondary';
+    }
+
+    return changePct > 0 ? 'text-up' : 'text-down';
+  }
+
+  function getChangeText(changePct: number | null) {
     if (changePct === null) {
-      return palette.icon;
+      return '--';
     }
-    if (changePct > 0) {
-      return '#D63A3A';
-    }
-    if (changePct < 0) {
-      return '#169B62';
-    }
-    return palette.icon;
+
+    return `${changePct > 0 ? '+' : ''}${changePct.toFixed(2)}%`;
   }
 
   function renderItem({ item }: { item: MarketRow }) {
-    const changeColor = getChangeColor(item.change_pct);
-
     return (
-      <View
-        style={[
-          styles.row,
-          {
-            backgroundColor: palette.background,
-            borderColor: palette.icon,
-          },
-        ]}>
-        <View style={styles.rowMain}>
-          <ThemedText type="defaultSemiBold">{item.symbol}</ThemedText>
-          <ThemedText>{item.name}</ThemedText>
+      <Pressable
+        className="flex-row items-center gap-3 border-b border-divider px-1 py-4 active:bg-white/5"
+        onPress={() => undefined}>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-primary">{item.name}</Text>
+          <Text className="mt-1 text-sm text-secondary">{item.symbol}</Text>
         </View>
-        <View style={styles.rowSide}>
-          <ThemedText type="defaultSemiBold">
+        <View className="items-end">
+          <Text
+            className="text-lg font-semibold text-primary"
+            style={{ fontVariant: ['tabular-nums'] }}>
             {item.price === null ? '--' : item.price.toFixed(2)}
-          </ThemedText>
-          <ThemedText style={{ color: changeColor }}>
-            {item.change_pct === null
-              ? '--'
-              : `${item.change_pct > 0 ? '+' : ''}${item.change_pct.toFixed(2)}%`}
-          </ThemedText>
+          </Text>
+          <Text
+            className={`mt-1 text-sm font-medium ${getChangeClass(item.changePct)}`}
+            style={{ fontVariant: ['tabular-nums'] }}>
+            {getChangeText(item.changePct)}
+          </Text>
         </View>
         <Pressable
-          onPress={() => handleDeleteSymbol(item.symbol)}
-          style={({ pressed }) => [styles.deleteButton, pressed && styles.buttonPressed]}>
-          <ThemedText style={styles.deleteText}>Delete</ThemedText>
+          className="ml-3 rounded-xl px-3 py-2 active:bg-white/5"
+          onPress={() => {
+            void handleDeleteSymbol(item.symbol);
+          }}>
+          <Text className="text-sm font-medium text-secondary">{t('market.delete')}</Text>
         </Pressable>
-      </View>
+      </Pressable>
     );
   }
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator color={palette.tint} />
-        <ThemedText>Loading market data...</ThemedText>
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator color="#5E6AD2" />
+        <Text className="mt-3 text-base text-secondary">{t('market.loading')}</Text>
       </View>
     );
   }
 
   return (
-    <View
-      style={[
-        styles.screen,
-        {
-          backgroundColor: palette.background,
-          paddingTop: insets.top + 12,
-        },
-      ]}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ThemedText type="title">Market</ThemedText>
-          <ThemedText>Track your A-share watchlist in real time.</ThemedText>
+    <View className="flex-1 bg-background px-5" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-row items-center justify-between pb-6">
+        <View className="flex-1 pr-4">
+          <Text className="text-3xl font-bold text-primary">{t('market.title')}</Text>
+          <Text className="mt-2 text-sm leading-5 text-secondary">
+            {t('market.subtitle')}
+          </Text>
         </View>
         <Pressable
-          onPress={() => setModalVisible(true)}
-          style={({ pressed }) => [
-            styles.addButton,
-            { backgroundColor: palette.tint },
-            pressed && styles.buttonPressed,
-          ]}>
-          <ThemedText style={styles.addButtonText}>+</ThemedText>
+          className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
+          onPress={() => setModalVisible(true)}>
+          <Text className="text-2xl font-semibold text-primary">+</Text>
         </Pressable>
       </View>
 
-      {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+      {error ? <Text className="pb-4 text-sm text-error">{error}</Text> : null}
 
       <FlatList
+        className="flex-1"
+        contentContainerStyle={rows.length === 0 ? { flexGrow: 1, justifyContent: 'center' } : undefined}
         data={rows}
         keyExtractor={(item) => item.symbol}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />}
         renderItem={renderItem}
-        contentContainerStyle={rows.length === 0 ? styles.emptyList : styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={palette.tint} />}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <ThemedText type="subtitle">No symbols yet</ThemedText>
-            <ThemedText>Add a 6-digit A-share code to start tracking quotes.</ThemedText>
+          <View className="items-center px-6">
+            <Text className="text-xl font-semibold text-primary">{t('market.emptyTitle')}</Text>
+            <Text className="mt-2 text-center text-sm leading-6 text-secondary">
+              {t('market.emptySubtitle')}
+            </Text>
           </View>
         }
       />
 
-      <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={closeModal}>
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.modalCard, { backgroundColor: palette.background }]}>
-            <ThemedText type="subtitle">Add A-share Symbol</ThemedText>
-            {modalError ? <ThemedText style={styles.errorText}>{modalError}</ThemedText> : null}
+      <Modal animationType="slide" onRequestClose={closeModal} transparent visible={modalVisible}>
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="rounded-t-3xl bg-surface px-5 pb-8 pt-6">
+            <Text className="text-xl font-semibold text-primary">{t('market.modalTitle')}</Text>
+            {modalError ? <Text className="mt-3 text-sm text-error">{modalError}</Text> : null}
             <TextInput
-              value={newSymbol}
+              className="mt-4 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+              keyboardType="number-pad"
+              maxLength={6}
               onChangeText={(value) => {
                 setNewSymbol(value);
                 if (modalError) {
                   setModalError(null);
                 }
               }}
-              keyboardType="number-pad"
-              maxLength={6}
-              placeholder="600519"
-              placeholderTextColor={palette.icon}
-              style={[
-                styles.input,
-                {
-                  borderColor: palette.icon,
-                  color: palette.text,
-                },
-              ]}
+              placeholder={t('market.symbolPlaceholder')}
+              placeholderTextColor="#8B8B9E"
+              value={newSymbol}
             />
-            <View style={styles.modalActions}>
+            <View className="mt-5 flex-row justify-end gap-3">
               <Pressable
-                onPress={closeModal}
-                style={({ pressed }) => [
-                  styles.secondaryButton,
-                  {
-                    borderColor: palette.icon,
-                  },
-                  pressed && styles.buttonPressed,
-                ]}>
-                <ThemedText>Cancel</ThemedText>
+                className="rounded-xl border border-divider px-4 py-3 active:bg-white/5"
+                onPress={closeModal}>
+                <Text className="font-medium text-secondary">{t('market.cancel')}</Text>
               </Pressable>
               <Pressable
+                className={`rounded-xl px-4 py-3 ${submitting ? 'bg-accent/70' : 'bg-accent active:opacity-80'}`}
                 disabled={submitting}
-                onPress={handleAddSymbol}
-                style={({ pressed }) => [
-                  styles.primaryButton,
-                  { backgroundColor: palette.tint },
-                  pressed && styles.buttonPressed,
-                  submitting && styles.buttonDisabled,
-                ]}>
-                <ThemedText style={styles.primaryButtonText}>
-                  {submitting ? 'Adding...' : 'Add'}
-                </ThemedText>
+                onPress={() => {
+                  void handleAddSymbol();
+                }}>
+                <Text className="font-medium text-primary">
+                  {submitting ? t('market.adding') : t('market.add')}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -275,125 +248,3 @@ export default function MarketScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 16,
-  },
-  headerText: {
-    flex: 1,
-    gap: 4,
-  },
-  addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    lineHeight: 24,
-    fontWeight: '700',
-  },
-  listContent: {
-    gap: 12,
-    paddingBottom: 24,
-  },
-  emptyList: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 80,
-  },
-  emptyState: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  row: {
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  rowMain: {
-    flex: 1,
-    gap: 2,
-  },
-  rowSide: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  deleteButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  deleteText: {
-    color: '#B42318',
-    fontWeight: '600',
-  },
-  errorText: {
-    color: '#B42318',
-    marginBottom: 12,
-  },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-  },
-  modalCard: {
-    padding: 20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    gap: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  secondaryButton: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  primaryButton: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  buttonPressed: {
-    opacity: 0.8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-});
