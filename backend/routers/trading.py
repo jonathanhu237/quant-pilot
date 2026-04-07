@@ -1,13 +1,13 @@
 import asyncio
 from typing import Annotated, Literal
 
-import akshare as ak
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models.trading import Account, Position, Trade
+from schemas.market import StockQuote
 from schemas.trading import (
     AccountResponse,
     PositionResponse,
@@ -15,28 +15,11 @@ from schemas.trading import (
     TradeRequest,
     TradeResponse,
 )
+from services.quotes import fetch_quote_map
 
 router = APIRouter()
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 INITIAL_CASH = 100000.0
-
-
-def fetch_quotes(symbols: list[str]) -> dict[str, dict[str, float | str]]:
-    normalized_symbols = {symbol.strip() for symbol in symbols if symbol.strip()}
-    if not normalized_symbols:
-        return {}
-
-    spot = ak.stock_zh_a_spot_em()
-    filtered = spot[spot["代码"].isin(normalized_symbols)]
-
-    quotes: dict[str, dict[str, float | str]] = {}
-    for _, row in filtered.iterrows():
-        quotes[str(row["代码"])] = {
-            "name": str(row["名称"]),
-            "price": float(row["最新价"]),
-        }
-
-    return quotes
 
 
 async def get_or_create_account(db: AsyncSession) -> Account:
@@ -55,12 +38,12 @@ async def get_or_create_account(db: AsyncSession) -> Account:
 async def load_positions_with_quotes(db: AsyncSession) -> tuple[list[Position], dict[str, dict[str, float | str]]]:
     positions_result = await db.execute(select(Position).order_by(Position.symbol.asc()))
     positions = list(positions_result.scalars().all())
-    quotes = await asyncio.to_thread(fetch_quotes, [position.symbol for position in positions])
+    quotes = await asyncio.to_thread(fetch_quote_map, [position.symbol for position in positions])
     return positions, quotes
 
 
-def build_position_response(position: Position, quote: dict[str, float | str] | None) -> PositionResponse:
-    current_price = float(quote["price"]) if quote else position.average_cost
+def build_position_response(position: Position, quote: StockQuote | None) -> PositionResponse:
+    current_price = quote.price if quote else position.average_cost
     market_value = position.shares * current_price
     cost_basis = position.shares * position.average_cost
     unrealized_pnl = market_value - cost_basis
@@ -68,7 +51,7 @@ def build_position_response(position: Position, quote: dict[str, float | str] | 
 
     return PositionResponse(
         symbol=position.symbol,
-        name=str(quote["name"]) if quote else position.symbol,
+        name=quote.name if quote else position.symbol,
         shares=position.shares,
         average_cost=position.average_cost,
         current_price=current_price,
@@ -106,7 +89,7 @@ async def execute_trade(
     side: Literal["buy", "sell"],
 ) -> TradeActionResponse:
     account = await get_or_create_account(db)
-    quotes = await asyncio.to_thread(fetch_quotes, [payload.symbol])
+    quotes = await asyncio.to_thread(fetch_quote_map, [payload.symbol])
     quote = quotes.get(payload.symbol)
 
     if quote is None:
@@ -115,7 +98,7 @@ async def execute_trade(
             detail="Live quote not available for the selected symbol",
         )
 
-    price = float(quote["price"])
+    price = quote.price
     trade_value = price * payload.shares
 
     position_result = await db.execute(select(Position).where(Position.symbol == payload.symbol))
