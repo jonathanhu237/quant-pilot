@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -38,6 +39,7 @@ function buildRows(symbols: string[], quotes: Awaited<ReturnType<typeof getQuote
 export default function MarketScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
   const [rows, setRows] = useState<MarketRow[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,8 @@ export default function MarketScreen() {
   const [modalError, setModalError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const accentColor = '#5E6AD2';
+  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
 
   const loadMarket = useCallback(async () => {
     setError(null);
@@ -177,7 +181,7 @@ export default function MarketScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#5E6AD2" />
+        <ActivityIndicator color={accentColor} />
         <Text className="mt-3 text-base text-secondary">{t('market.loading')}</Text>
       </View>
     );
@@ -206,7 +210,7 @@ export default function MarketScreen() {
         contentContainerStyle={rows.length === 0 ? { flexGrow: 1, justifyContent: 'center' } : undefined}
         data={rows}
         keyExtractor={(item) => item.symbol}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />}
         renderItem={renderItem}
         ListEmptyComponent={
           <View className="items-center px-6">
@@ -234,7 +238,7 @@ export default function MarketScreen() {
                 }
               }}
               placeholder={t('market.symbolPlaceholder')}
-              placeholderTextColor="#8B8B9E"
+              placeholderTextColor={placeholderColor}
               value={newSymbol}
             />
             <View className="mt-5 flex-row justify-end gap-3">

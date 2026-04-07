@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
 import {
   getDashboard,
@@ -19,6 +21,8 @@ import {
   type DashboardTrade,
   type DashboardWatchlistQuote,
 } from '@/lib/api';
+
+const THEME_STORAGE_KEY = 'quantpilot.theme';
 
 function formatCurrency(value: number) {
   return `¥${value.toLocaleString('en-US', {
@@ -42,7 +46,13 @@ function getValueColorClass(value: number) {
   return 'text-secondary';
 }
 
-function TradeRow({ trade, t }: { trade: DashboardTrade; t: ReturnType<typeof useTranslation>['t'] }) {
+function TradeRow({
+  trade,
+  t,
+}: {
+  trade: DashboardTrade;
+  t: ReturnType<typeof useTranslation>['t'];
+}) {
   return (
     <View className="flex-row items-start justify-between border-t border-divider px-4 py-4 first:border-t-0">
       <View className="flex-1 pr-4">
@@ -64,11 +74,7 @@ function TradeRow({ trade, t }: { trade: DashboardTrade; t: ReturnType<typeof us
   );
 }
 
-function QuoteRow({
-  quote,
-}: {
-  quote: DashboardWatchlistQuote;
-}) {
+function QuoteRow({ quote }: { quote: DashboardWatchlistQuote }) {
   return (
     <View className="flex-row items-center justify-between border-t border-divider px-4 py-4 first:border-t-0">
       <View className="flex-1 pr-4">
@@ -89,10 +95,13 @@ function QuoteRow({
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { i18n, t } = useTranslation();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isDark = colorScheme !== 'light';
+  const accentColor = '#5E6AD2';
 
   const loadDashboard = useCallback(async () => {
     setError(null);
@@ -131,10 +140,16 @@ export default function HomeScreen() {
     await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
   }
 
+  async function toggleTheme() {
+    const nextTheme = isDark ? 'light' : 'dark';
+    setColorScheme(nextTheme);
+    await AsyncStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  }
+
   if (loading || dashboard === null) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#5E6AD2" />
+        <ActivityIndicator color={accentColor} />
         <Text className="mt-3 text-base text-secondary">{t('home.loading')}</Text>
       </View>
     );
@@ -144,19 +159,34 @@ export default function HomeScreen() {
     <ScrollView
       className="flex-1 bg-background"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 32 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />}>
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
+      }>
       <View className="px-5">
         <View className="flex-row items-start justify-between gap-4">
           <Text className="flex-1 text-3xl font-bold text-primary">{t('home.title')}</Text>
-          <Pressable
-            className="rounded-full bg-surface px-3 py-1 active:opacity-80"
-            onPress={() => {
-              void toggleLanguage();
-            }}>
-            <Text className="font-semibold text-accent">
-              {i18n.language.toLowerCase().startsWith('zh') ? 'EN' : '中'}
-            </Text>
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <Pressable
+              className="rounded-full bg-surface px-3 py-1 active:opacity-80"
+              onPress={() => {
+                void toggleLanguage();
+              }}>
+              <Text className="font-semibold text-accent">
+                {i18n.language.toLowerCase().startsWith('zh') ? 'EN' : '中'}
+              </Text>
+            </Pressable>
+            <Pressable
+              className="rounded-full bg-surface px-3 py-2 active:opacity-80"
+              onPress={() => {
+                void toggleTheme();
+              }}>
+              <IconSymbol
+                name={isDark ? 'moon.fill' : 'sun.max.fill'}
+                size={16}
+                color={accentColor}
+              />
+            </Pressable>
+          </View>
         </View>
         <Text className="mt-2 text-sm leading-5 text-secondary">{t('home.subtitle')}</Text>
 
@@ -184,7 +214,9 @@ export default function HomeScreen() {
 
         <View className="mt-6 rounded-3xl bg-surface">
           <View className="px-4 pt-5">
-            <Text className="text-xl font-semibold text-primary">{t('home.recentTrades.title')}</Text>
+            <Text className="text-xl font-semibold text-primary">
+              {t('home.recentTrades.title')}
+            </Text>
             <Text className="mt-2 text-sm leading-5 text-secondary">
               {t('home.recentTrades.subtitle')}
             </Text>
@@ -202,7 +234,9 @@ export default function HomeScreen() {
 
         <View className="mt-6 rounded-3xl bg-surface">
           <View className="px-4 pt-5">
-            <Text className="text-xl font-semibold text-primary">{t('home.watchlist.title')}</Text>
+            <Text className="text-xl font-semibold text-primary">
+              {t('home.watchlist.title')}
+            </Text>
             <Text className="mt-2 text-sm leading-5 text-secondary">
               {t('home.watchlist.subtitle')}
             </Text>

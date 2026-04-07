@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -49,6 +50,7 @@ function getValueColor(value: number) {
 export default function PaperTradingScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
   const [account, setAccount] = useState<TradingAccount | null>(null);
   const [history, setHistory] = useState<TradingTrade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +63,8 @@ export default function PaperTradingScreen() {
   const [tradeSide, setTradeSide] = useState<TradeSide>('buy');
   const [symbol, setSymbol] = useState('');
   const [shares, setShares] = useState('');
+  const accentColor = '#5E6AD2';
+  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
 
   async function loadTradingData() {
     setError(null);
@@ -142,7 +146,7 @@ export default function PaperTradingScreen() {
   if (loading || account === null) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#5E6AD2" />
+        <ActivityIndicator color={accentColor} />
         <Text className="mt-3 text-base text-secondary">{t('paperTrading.loading')}</Text>
       </View>
     );
@@ -157,7 +161,7 @@ export default function PaperTradingScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor="#5E6AD2"
+            tintColor={accentColor}
           />
         }>
         <View className="px-5">
@@ -395,7 +399,7 @@ export default function PaperTradingScreen() {
                   setModalError(null);
                 }}
                 placeholder={t('paperTrading.tradeModal.symbolPlaceholder')}
-                placeholderTextColor="#8B8B9E"
+                placeholderTextColor={placeholderColor}
                 value={symbol}
               />
             </View>
@@ -412,7 +416,7 @@ export default function PaperTradingScreen() {
                   setModalError(null);
                 }}
                 placeholder={t('paperTrading.tradeModal.sharesPlaceholder')}
-                placeholderTextColor="#8B8B9E"
+                placeholderTextColor={placeholderColor}
                 value={shares}
               />
             </View>

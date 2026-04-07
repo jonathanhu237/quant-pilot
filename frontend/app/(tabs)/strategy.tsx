@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -63,6 +64,7 @@ function metricColorClass(value: number, kind: 'return' | 'drawdown' | 'neutral'
 export default function StrategyScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
   const [strategies, setStrategies] = useState<StrategyMeta[]>([]);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(null);
   const [symbol, setSymbol] = useState('600519');
@@ -72,6 +74,8 @@ export default function StrategyScreen() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const accentColor = '#5E6AD2';
+  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
 
   useEffect(() => {
     async function loadStrategyMetadata() {
@@ -203,7 +207,7 @@ export default function StrategyScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color="#5E6AD2" />
+        <ActivityIndicator color={accentColor} />
         <Text className="mt-3 text-base text-secondary">{t('strategy.loading')}</Text>
       </View>
     );
@@ -264,7 +268,7 @@ export default function StrategyScreen() {
                   setError(null);
                 }}
                 placeholder={t('strategy.symbolPlaceholder')}
-                placeholderTextColor="#8B8B9E"
+                placeholderTextColor={placeholderColor}
                 value={symbol}
               />
             </View>

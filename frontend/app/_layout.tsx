@@ -1,10 +1,11 @@
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colorScheme, useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { LANGUAGE_STORAGE_KEY, normalizeLanguageTag } from '@/lib/i18n';
@@ -14,16 +15,15 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+const THEME_STORAGE_KEY = 'quantpilot.theme';
+
 export default function RootLayout() {
   const { t } = useTranslation();
-  const [isLanguageReady, setIsLanguageReady] = useState(false);
+  const { colorScheme: currentColorScheme } = useColorScheme();
+  const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync('#0F0F14');
-  }, []);
-
-  useEffect(() => {
-    async function restoreLanguagePreference() {
+    async function restorePreferences() {
       try {
         const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
         if (storedLanguage) {
@@ -32,28 +32,41 @@ export default function RootLayout() {
             await i18n.changeLanguage(nextLanguage);
           }
         }
+
+        const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+          colorScheme.set(storedTheme);
+        }
       } finally {
-        setIsLanguageReady(true);
+        setIsAppReady(true);
       }
     }
 
-    void restoreLanguagePreference();
+    void restorePreferences();
   }, []);
 
+  useEffect(() => {
+    const backgroundColor = currentColorScheme === 'light' ? '#F5F5F7' : '#0F0F14';
+    void SystemUI.setBackgroundColorAsync(backgroundColor);
+  }, [currentColorScheme]);
+
+  const isDark = currentColorScheme !== 'light';
+  const baseTheme = isDark ? DarkTheme : DefaultTheme;
   const theme = {
-    ...DarkTheme,
+    ...baseTheme,
+    dark: isDark,
     colors: {
-      ...DarkTheme.colors,
+      ...baseTheme.colors,
       primary: '#5E6AD2',
-      background: '#0F0F14',
-      card: '#0F0F14',
-      text: '#FFFFFF',
-      border: 'rgba(255,255,255,0.08)',
+      background: isDark ? '#0F0F14' : '#F5F5F7',
+      card: isDark ? '#0F0F14' : '#F5F5F7',
+      text: isDark ? '#FFFFFF' : '#0F0F14',
+      border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
       notification: '#FF4D4D',
     },
   };
 
-  if (!isLanguageReady) {
+  if (!isAppReady) {
     return null;
   }
 
@@ -66,7 +79,7 @@ export default function RootLayout() {
           options={{ presentation: 'modal', title: t('modal.title') }}
         />
       </Stack>
-      <StatusBar style="light" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }

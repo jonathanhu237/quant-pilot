@@ -18,6 +18,8 @@ const MAPPING = {
   'chart.line.uptrend.xyaxis': 'show-chart',
   'lightbulb.fill': 'lightbulb',
   'dollarsign.circle.fill': 'attach-money',
+  'moon.fill': 'dark-mode',
+  'sun.max.fill': 'wb-sunny',
   'bubble.left.and.bubble.right.fill': 'forum',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',

@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -6,18 +7,20 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function TabLayout() {
   const { t } = useTranslation();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme !== 'light';
 
   return (
     <Tabs
       screenOptions={{
         sceneStyle: {
-          backgroundColor: '#0F0F14',
+          backgroundColor: isDark ? '#0F0F14' : '#F5F5F7',
         },
         tabBarStyle: {
-          backgroundColor: '#0F0F14',
-          borderTopColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: isDark ? '#0F0F14' : '#F5F5F7',
+          borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
         },
-        tabBarInactiveTintColor: '#8B8B9E',
+        tabBarInactiveTintColor: isDark ? '#8B8B9E' : '#6B6B7E',
         tabBarActiveTintColor: '#5E6AD2',
         tabBarLabelStyle: {
           fontSize: 12,

@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-background: 245 245 247;
+  --color-surface: 255 255 255;
+  --color-primary: 15 15 20;
+  --color-secondary: 107 107 126;
+  --color-divider: 0 0 0;
+  --color-up: 255 77 77;
+  --color-down: 0 196 140;
+  --color-accent: 94 106 210;
+  --color-error: 255 77 77;
+}
+
+.dark {
+  --color-background: 15 15 20;
+  --color-surface: 26 26 36;
+  --color-primary: 255 255 255;
+  --color-secondary: 139 139 158;
+  --color-divider: 255 255 255;
+  --color-up: 255 77 77;
+  --color-down: 0 196 140;
+  --color-accent: 94 106 210;
+  --color-error: 255 77 77;
+}
