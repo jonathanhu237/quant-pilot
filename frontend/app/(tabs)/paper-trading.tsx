@@ -392,8 +392,7 @@ export default function PaperTradingScreen() {
               </Text>
               <TextInput
                 className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                style={{ height: 48, paddingTop: 0, paddingBottom: 0 }}
-                textAlignVertical="center"
+                style={{ paddingVertical: 14 }}
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
@@ -412,8 +411,7 @@ export default function PaperTradingScreen() {
               </Text>
               <TextInput
                 className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                style={{ height: 48, paddingTop: 0, paddingBottom: 0 }}
-                textAlignVertical="center"
+                style={{ paddingVertical: 14 }}
                 keyboardType="number-pad"
                 onChangeText={(value) => {
                   setShares(value);
