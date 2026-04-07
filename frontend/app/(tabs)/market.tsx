@@ -226,7 +226,8 @@ export default function MarketScreen() {
             <Text className="text-xl font-semibold text-primary">{t('market.modalTitle')}</Text>
             {modalError ? <Text className="mt-3 text-sm text-error">{modalError}</Text> : null}
             <TextInput
-              className="mt-4 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+              className="mt-4 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
+              style={{ height: 48, paddingTop: 0, paddingBottom: 0 }}
               keyboardType="number-pad"
               maxLength={6}
               textAlignVertical="center"
