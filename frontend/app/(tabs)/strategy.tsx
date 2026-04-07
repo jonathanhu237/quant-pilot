@@ -261,6 +261,7 @@ export default function StrategyScreen() {
               </Text>
               <TextInput
                 className="mt-2 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+                    textAlignVertical="center"
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
@@ -310,6 +311,7 @@ export default function StrategyScreen() {
                   </Text>
                   <TextInput
                     className="mt-2 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+                    textAlignVertical="center"
                     keyboardType="numeric"
                     onChangeText={(value) => updateParam(definition.name, value)}
                     value={params[definition.name] ?? String(definition.default)}

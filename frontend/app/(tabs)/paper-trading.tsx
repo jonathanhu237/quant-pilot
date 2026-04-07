@@ -392,6 +392,7 @@ export default function PaperTradingScreen() {
               </Text>
               <TextInput
                 className="mt-2 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+                textAlignVertical="center"
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
@@ -410,6 +411,7 @@ export default function PaperTradingScreen() {
               </Text>
               <TextInput
                 className="mt-2 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
+                textAlignVertical="center"
                 keyboardType="number-pad"
                 onChangeText={(value) => {
                   setShares(value);

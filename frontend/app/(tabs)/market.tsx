@@ -229,6 +229,7 @@ export default function MarketScreen() {
               className="mt-4 rounded-2xl border border-divider bg-background px-4 py-3 text-base text-primary"
               keyboardType="number-pad"
               maxLength={6}
+              textAlignVertical="center"
               onChangeText={(value) => {
                 setNewSymbol(value);
                 if (modalError) {
