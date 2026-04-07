@@ -4,11 +4,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colorScheme, useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { LANGUAGE_STORAGE_KEY, normalizeLanguageTag } from '@/lib/i18n';
+import { getPreference } from '@/lib/preferences';
 import '../global.css';
 
 export const unstable_settings = {
@@ -25,7 +25,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function restorePreferences() {
       try {
-        const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+        const storedLanguage = await getPreference(LANGUAGE_STORAGE_KEY);
         if (storedLanguage) {
           const nextLanguage = normalizeLanguageTag(storedLanguage);
           if (nextLanguage !== i18n.language) {
@@ -33,9 +33,11 @@ export default function RootLayout() {
           }
         }
 
-        const storedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        const storedTheme = await getPreference(THEME_STORAGE_KEY);
         if (storedTheme === 'light' || storedTheme === 'dark') {
           colorScheme.set(storedTheme);
+        } else {
+          colorScheme.set('dark');
         }
       } finally {
         setIsAppReady(true);

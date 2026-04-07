@@ -7,7 +7,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
+import { setPreference } from '@/lib/preferences';
 import {
   getDashboard,
   type DashboardResponse,
@@ -137,13 +137,13 @@ export default function HomeScreen() {
   async function toggleLanguage() {
     const nextLanguage = i18n.language.toLowerCase().startsWith('zh') ? 'en' : 'zh-CN';
     await i18n.changeLanguage(nextLanguage);
-    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+    await setPreference(LANGUAGE_STORAGE_KEY, nextLanguage);
   }
 
   async function toggleTheme() {
     const nextTheme = isDark ? 'light' : 'dark';
     setColorScheme(nextTheme);
-    await AsyncStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    await setPreference(THEME_STORAGE_KEY, nextTheme);
   }
 
   if (loading || dashboard === null) {
