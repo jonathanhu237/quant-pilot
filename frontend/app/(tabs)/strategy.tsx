@@ -260,8 +260,8 @@ export default function StrategyScreen() {
                 {t('strategy.symbolLabel')}
               </Text>
               <TextInput
-                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                    style={{ paddingVertical: 14 }}
+                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                    style={{ paddingVertical: 14, fontSize: 16, lineHeight: undefined }}
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
@@ -310,8 +310,8 @@ export default function StrategyScreen() {
                     {getParameterLabel(selectedStrategy.id, definition.name)}
                   </Text>
                   <TextInput
-                    className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                    style={{ paddingVertical: 14 }}
+                    className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                    style={{ paddingVertical: 14, fontSize: 16, lineHeight: undefined }}
                     keyboardType="numeric"
                     onChangeText={(value) => updateParam(definition.name, value)}
                     value={params[definition.name] ?? String(definition.default)}

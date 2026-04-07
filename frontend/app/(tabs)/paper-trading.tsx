@@ -391,8 +391,8 @@ export default function PaperTradingScreen() {
                 {t('paperTrading.tradeModal.symbol')}
               </Text>
               <TextInput
-                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                style={{ paddingVertical: 14 }}
+                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                style={{ paddingVertical: 14, fontSize: 16, lineHeight: undefined }}
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
@@ -410,8 +410,8 @@ export default function PaperTradingScreen() {
                 {t('paperTrading.tradeModal.shares')}
               </Text>
               <TextInput
-                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-base text-primary"
-                style={{ paddingVertical: 14 }}
+                className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                style={{ paddingVertical: 14, fontSize: 16, lineHeight: undefined }}
                 keyboardType="number-pad"
                 onChangeText={(value) => {
                   setShares(value);
