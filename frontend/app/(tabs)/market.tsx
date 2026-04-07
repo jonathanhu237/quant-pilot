@@ -21,6 +21,20 @@ type MarketRow = {
   changePct: number | null;
 };
 
+function buildRows(symbols: string[], quotes: Awaited<ReturnType<typeof getQuotes>>, fallbackName: string) {
+  const quoteMap = new Map(quotes.map((quote) => [quote.symbol, quote]));
+
+  return symbols.map((symbol) => {
+    const quote = quoteMap.get(symbol);
+    return {
+      symbol,
+      name: quote?.name ?? fallbackName,
+      price: quote?.price ?? null,
+      changePct: quote?.change_pct ?? null,
+    };
+  });
+}
+
 export default function MarketScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -36,20 +50,18 @@ export default function MarketScreen() {
   const loadMarket = useCallback(async () => {
     setError(null);
     const symbols = await getWatchlist();
-    const quotes = await getQuotes(symbols);
-    const quoteMap = new Map(quotes.map((quote) => [quote.symbol, quote]));
+    if (symbols.length === 0) {
+      setRows([]);
+      return;
+    }
 
-    setRows(
-      symbols.map((symbol) => {
-        const quote = quoteMap.get(symbol);
-        return {
-          symbol,
-          name: quote?.name ?? t('market.quoteUnavailable'),
-          price: quote?.price ?? null,
-          changePct: quote?.change_pct ?? null,
-        };
-      })
-    );
+    try {
+      const quotes = await getQuotes(symbols);
+      setRows(buildRows(symbols, quotes, t('market.quoteUnavailable')));
+    } catch {
+      setRows(buildRows(symbols, [], t('market.quoteUnavailable')));
+      setError(t('market.errors.quotesUnavailable'));
+    }
   }, [t]);
 
   useEffect(() => {
