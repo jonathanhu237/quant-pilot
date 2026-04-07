@@ -84,7 +84,51 @@
   },
   "paperTrading": {
     "title": "Paper Trading",
-    "subtitle": "Simulate trades and track portfolio performance."
+    "subtitle": "Manage your virtual account, positions, and trade history.",
+    "loading": "Loading trading account...",
+    "tradeButton": "Trade",
+    "sharesUnit": "shares",
+    "tabs": {
+      "positions": "Positions",
+      "history": "History"
+    },
+    "summary": {
+      "totalAssets": "Total Assets",
+      "cash": "Available Cash",
+      "marketValue": "Holdings Value",
+      "totalPnl": "Total P&L",
+      "returnRate": "Return Rate"
+    },
+    "position": {
+      "cost": "Avg Cost",
+      "current": "Current",
+      "marketValue": "Market Value"
+    },
+    "tradeSide": {
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "tradeModal": {
+      "title": "Place Trade",
+      "symbol": "A-share symbol",
+      "symbolPlaceholder": "600519",
+      "shares": "Shares",
+      "sharesPlaceholder": "100",
+      "cancel": "Cancel",
+      "submitting": "Submitting...",
+      "confirm": {
+        "buy": "Buy",
+        "sell": "Sell"
+      }
+    },
+    "emptyPositions": "No positions yet.",
+    "emptyHistory": "No trade history yet.",
+    "errors": {
+      "load": "Failed to load trading data.",
+      "trade": "Failed to execute trade.",
+      "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
+      "invalidShares": "Please enter a valid number of shares."
+    }
   },
   "ai": {
     "title": "AI Assistant",

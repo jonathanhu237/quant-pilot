@@ -84,7 +84,51 @@
   },
   "paperTrading": {
     "title": "模拟交易",
-    "subtitle": "模拟买卖并跟踪组合表现。"
+    "subtitle": "管理你的虚拟账户、持仓和成交记录。",
+    "loading": "正在加载交易账户...",
+    "tradeButton": "交易",
+    "sharesUnit": "股",
+    "tabs": {
+      "positions": "持仓",
+      "history": "历史记录"
+    },
+    "summary": {
+      "totalAssets": "总资产",
+      "cash": "可用现金",
+      "marketValue": "持仓市值",
+      "totalPnl": "总盈亏",
+      "returnRate": "收益率"
+    },
+    "position": {
+      "cost": "成本价",
+      "current": "现价",
+      "marketValue": "持仓市值"
+    },
+    "tradeSide": {
+      "buy": "买入",
+      "sell": "卖出"
+    },
+    "tradeModal": {
+      "title": "提交交易",
+      "symbol": "股票代码",
+      "symbolPlaceholder": "600519",
+      "shares": "股数",
+      "sharesPlaceholder": "100",
+      "cancel": "取消",
+      "submitting": "提交中...",
+      "confirm": {
+        "buy": "买入",
+        "sell": "卖出"
+      }
+    },
+    "emptyPositions": "当前还没有持仓。",
+    "emptyHistory": "当前还没有成交记录。",
+    "errors": {
+      "load": "加载交易数据失败。",
+      "trade": "执行交易失败。",
+      "invalidSymbol": "请输入有效的 6 位 A 股代码。",
+      "invalidShares": "请输入有效的股数。"
+    }
   },
   "ai": {
     "title": "AI 助手",

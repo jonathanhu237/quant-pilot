@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import models.trading  # noqa: F401
 import models.watchlist  # noqa: F401
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 from routers.market import router as market_router
 from routers.strategy import router as strategy_router
+from routers.trading import router as trading_router
 from routers.watchlist import router as watchlist_router
 
 
@@ -29,6 +31,7 @@ app.add_middleware(
 
 app.include_router(market_router, prefix="/api/market", tags=["market"])
 app.include_router(strategy_router, prefix="/api/strategy", tags=["strategy"])
+app.include_router(trading_router, prefix="/api/trading", tags=["trading"])
 app.include_router(watchlist_router, prefix="/api/watchlist", tags=["watchlist"])
 
 

@@ -42,6 +42,40 @@ export type BacktestResult = {
   total_trades: number;
 };
 
+export type TradingPosition = {
+  symbol: string;
+  name: string;
+  shares: number;
+  average_cost: number;
+  current_price: number;
+  market_value: number;
+  unrealized_pnl: number;
+  unrealized_pnl_pct: number;
+};
+
+export type TradingAccount = {
+  cash_balance: number;
+  market_value: number;
+  total_assets: number;
+  total_pnl: number;
+  total_return_rate: number;
+  positions: TradingPosition[];
+};
+
+export type TradingTrade = {
+  id: number;
+  side: 'buy' | 'sell';
+  symbol: string;
+  shares: number;
+  price: number;
+  created_at: string;
+};
+
+export type TradeRequest = {
+  symbol: string;
+  shares: number;
+};
+
 type WatchlistItem = {
   symbol: string;
 };
@@ -123,4 +157,26 @@ export async function runBacktest(payload: BacktestRequest): Promise<BacktestRes
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export async function getTradingAccount(): Promise<TradingAccount> {
+  return request<TradingAccount>('/api/trading/account');
+}
+
+export async function buyStock(payload: TradeRequest): Promise<void> {
+  await request('/api/trading/buy', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function sellStock(payload: TradeRequest): Promise<void> {
+  await request('/api/trading/sell', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getTradeHistory(): Promise<TradingTrade[]> {
+  return request<TradingTrade[]>('/api/trading/history');
 }
