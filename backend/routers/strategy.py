@@ -20,11 +20,6 @@ async def list_strategies() -> list[StrategyMeta]:
 async def execute_backtest(payload: BacktestRequest) -> BacktestResult:
     try:
         return await asyncio.to_thread(run_backtest, payload)
-    except KeyError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Strategy not found",
-        ) from exc
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

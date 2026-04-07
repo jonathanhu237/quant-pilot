@@ -24,7 +24,7 @@ def list_strategy_metadata() -> list[StrategyMeta]:
 def get_strategy_class(strategy_id: str) -> type[BaseStrategy]:
     strategy_class = STRATEGY_REGISTRY.get(strategy_id)
     if strategy_class is None:
-        raise KeyError("Strategy not found")
+        raise ValueError("Strategy not found")
     return strategy_class
 
 
@@ -145,6 +145,8 @@ def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, float |
 def run_backtest(request: BacktestRequest) -> BacktestResult:
     strategy_class = get_strategy_class(request.strategy_id)
     history = fetch_historical_data(request.symbol, request.start_date, request.end_date)
+    if len(history) < 2:
+        raise ValueError("Not enough historical data to run a backtest")
     strategy = strategy_class(request.params)
     signals = strategy.generate_signals(history).reindex(history.index).fillna(0).astype(int)
     metrics = calculate_metrics(history["close"], signals)

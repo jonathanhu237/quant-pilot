@@ -17,6 +17,18 @@ class TradeRequest(BaseModel):
         return normalized
 
 
+TradeErrorCode = Literal[
+    "insufficient_cash",
+    "insufficient_position",
+    "quote_unavailable",
+]
+
+
+class TradeErrorDetail(BaseModel):
+    error_code: TradeErrorCode
+    message: str
+
+
 class PositionResponse(BaseModel):
     symbol: str
     name: str

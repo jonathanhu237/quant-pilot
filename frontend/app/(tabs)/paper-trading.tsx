@@ -24,6 +24,16 @@ import {
 
 type TradingTab = 'positions' | 'history';
 type TradeSide = 'buy' | 'sell';
+type TradeErrorCode = 'insufficient_cash' | 'insufficient_position' | 'quote_unavailable';
+type TradeApiError = Error & { code?: string };
+
+function isTradeErrorCode(code: string | undefined): code is TradeErrorCode {
+  return (
+    code === 'insufficient_cash' ||
+    code === 'insufficient_position' ||
+    code === 'quote_unavailable'
+  );
+}
 
 function formatCurrency(value: number) {
   return `¥${value.toLocaleString('en-US', {
@@ -135,9 +145,13 @@ export default function PaperTradingScreen() {
       closeModal();
       await loadTradingData();
     } catch (tradeError) {
-      setModalError(
-        tradeError instanceof Error ? tradeError.message : t('paperTrading.errors.trade')
-      );
+      const errorCode =
+        tradeError instanceof Error ? (tradeError as TradeApiError).code : undefined;
+      if (isTradeErrorCode(errorCode)) {
+        setModalError(t(`paperTrading.errors.${errorCode}`));
+      } else {
+        setModalError(t('paperTrading.errors.trade'));
+      }
     } finally {
       setSubmitting(false);
     }

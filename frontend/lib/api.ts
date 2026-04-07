@@ -107,12 +107,33 @@ type WatchlistItem = {
   symbol: string;
 };
 
+type StructuredErrorDetail = {
+  error_code?: string;
+  message?: string;
+};
+
 type ErrorPayload = {
-  detail?: string;
+  detail?: string | StructuredErrorDetail;
+};
+
+type RequestError = Error & {
+  code?: string;
 };
 
 const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 const BASE_URL = `http://${HOST}:8000`;
+
+function isStructuredErrorDetail(value: unknown): value is StructuredErrorDetail {
+  return typeof value === 'object' && value !== null;
+}
+
+function buildRequestError(message: string, code?: string): RequestError {
+  const error = new Error(message) as RequestError;
+  if (code) {
+    error.code = code;
+  }
+  return error;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
@@ -125,11 +146,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`;
+    let code: string | undefined;
 
     try {
       const payload = (await response.json()) as ErrorPayload;
       if (payload.detail) {
-        message = payload.detail;
+        if (typeof payload.detail === 'string') {
+          message = payload.detail;
+        } else if (isStructuredErrorDetail(payload.detail)) {
+          code = payload.detail.error_code;
+          message = payload.detail.message ?? message;
+        }
       }
     } catch {
       const fallback = await response.text();
@@ -138,7 +165,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       }
     }
 
-    throw new Error(message);
+    throw buildRequestError(message, code);
   }
 
   if (response.status === 204) {

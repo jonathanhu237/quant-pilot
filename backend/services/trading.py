@@ -11,11 +11,17 @@ from schemas.trading import (
     AccountResponse,
     PositionResponse,
     TradeActionResponse,
+    TradeErrorCode,
+    TradeErrorDetail,
     TradeRequest,
 )
 from services.quotes import fetch_quote_map
 
 INITIAL_CASH = 100000.0
+
+
+def build_trade_error_detail(error_code: TradeErrorCode, message: str) -> dict[str, str]:
+    return TradeErrorDetail(error_code=error_code, message=message).model_dump()
 
 
 async def get_or_create_account(db: AsyncSession) -> Account:
@@ -93,7 +99,10 @@ async def execute_trade(
     if quote is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Live quote not available for the selected symbol",
+            detail=build_trade_error_detail(
+                "quote_unavailable",
+                "Live quote not available for the selected symbol",
+            ),
         )
 
     price = quote.price
@@ -106,7 +115,10 @@ async def execute_trade(
         if account.cash_balance < trade_value:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Insufficient cash balance",
+                detail=build_trade_error_detail(
+                    "insufficient_cash",
+                    "Insufficient cash balance",
+                ),
             )
 
         account.cash_balance -= trade_value
@@ -126,7 +138,10 @@ async def execute_trade(
         if position is None or position.shares < payload.shares:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Insufficient position size",
+                detail=build_trade_error_detail(
+                    "insufficient_position",
+                    "Insufficient position size",
+                ),
             )
 
         account.cash_balance += trade_value

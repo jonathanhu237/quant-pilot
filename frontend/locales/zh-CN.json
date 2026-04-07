@@ -146,7 +146,10 @@
       "load": "加载交易数据失败。",
       "trade": "执行交易失败。",
       "invalidSymbol": "请输入有效的 6 位 A 股代码。",
-      "invalidShares": "请输入有效的股数。"
+      "invalidShares": "请输入有效的股数。",
+      "insufficient_cash": "可用现金不足，无法完成本次买入。",
+      "insufficient_position": "持仓数量不足，无法完成本次卖出。",
+      "quote_unavailable": "该股票的实时行情暂时不可用。"
     }
   },
   "modal": {
