@@ -115,7 +115,7 @@ export default function MarketScreen() {
       closeModal();
       await loadMarket();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : t('market.errors.add'));
+      setModalError(submitError instanceof Error ? submitError.message : t('market.errors.add'));
     } finally {
       setSubmitting(false);
     }
@@ -148,9 +148,7 @@ export default function MarketScreen() {
 
   function renderItem({ item }: { item: MarketRow }) {
     return (
-      <Pressable
-        className="flex-row items-center gap-3 border-b border-divider px-1 py-4 active:bg-white/5"
-        onPress={() => undefined}>
+      <Pressable className="flex-row items-center gap-3 border-b border-divider px-1 py-4">
         <View className="flex-1">
           <Text className="text-base font-semibold text-primary">{item.name}</Text>
           <Text className="mt-1 text-sm text-secondary">{item.symbol}</Text>
@@ -168,7 +166,7 @@ export default function MarketScreen() {
           </Text>
         </View>
         <Pressable
-          className="ml-3 rounded-xl px-3 py-2 active:bg-white/5"
+          className="ml-3 rounded-xl px-3 py-2 active:opacity-80"
           onPress={() => {
             void handleDeleteSymbol(item.symbol);
           }}>
@@ -243,7 +241,7 @@ export default function MarketScreen() {
             />
             <View className="mt-5 flex-row justify-end gap-3">
               <Pressable
-                className="rounded-xl border border-divider px-4 py-3 active:bg-white/5"
+                className="rounded-xl border border-divider px-4 py-3 active:opacity-80"
                 onPress={closeModal}>
                 <Text className="font-medium text-secondary">{t('market.cancel')}</Text>
               </Pressable>

@@ -425,7 +425,7 @@ export default function PaperTradingScreen() {
 
             <View className="mt-6 flex-row justify-end gap-3">
               <Pressable
-                className="rounded-xl border border-divider px-4 py-3 active:bg-white/5"
+                className="rounded-xl border border-divider px-4 py-3 active:opacity-80"
                 onPress={closeModal}>
                 <Text className="font-medium text-secondary">
                   {t('paperTrading.tradeModal.cancel')}

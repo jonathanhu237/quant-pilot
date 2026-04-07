@@ -14,15 +14,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
-import { setPreference } from '@/lib/preferences';
+import { setPreference, THEME_STORAGE_KEY } from '@/lib/preferences';
 import {
   getDashboard,
   type DashboardResponse,
   type DashboardTrade,
   type DashboardWatchlistQuote,
 } from '@/lib/api';
-
-const THEME_STORAGE_KEY = 'quantpilot.theme';
 
 function formatCurrency(value: number) {
   return `¥${value.toLocaleString('en-US', {

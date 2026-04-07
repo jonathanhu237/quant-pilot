@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models.trading import Trade
 from models.watchlist import Watchlist
-from routers.trading import INITIAL_CASH, build_account_response, get_or_create_account
 from schemas.dashboard import AccountSummary, DashboardResponse, WatchlistQuoteSnapshot
 from schemas.market import StockQuote
 from schemas.trading import TradeResponse
 from services.quotes import fetch_quotes as fetch_market_quotes
+from services.trading import INITIAL_CASH, build_account_response, get_or_create_account
 
 router = APIRouter()
 DbSession = Annotated[AsyncSession, Depends(get_db)]

@@ -9,14 +9,12 @@ import { colorScheme, useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { LANGUAGE_STORAGE_KEY, normalizeLanguageTag } from '@/lib/i18n';
-import { getPreference } from '@/lib/preferences';
+import { getPreference, THEME_STORAGE_KEY } from '@/lib/preferences';
 import '../global.css';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
-
-const THEME_STORAGE_KEY = 'quantpilot.theme';
 
 export default function RootLayout() {
   const { t } = useTranslation();

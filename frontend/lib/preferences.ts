@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+export const THEME_STORAGE_KEY = 'quantpilot.theme';
+
 const memoryStore = new Map<string, string>();
 let asyncStorageAvailable = true;
 
