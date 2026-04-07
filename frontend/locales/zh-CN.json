@@ -8,7 +8,26 @@
   },
   "home": {
     "title": "量化飞行员",
-    "subtitle": "策略亮点与每日摘要。"
+    "subtitle": "先看账户快照、最近交易和自选股动向。",
+    "loading": "正在加载首页数据...",
+    "account": {
+      "title": "模拟账户",
+      "cta": "前往模拟交易"
+    },
+    "recentTrades": {
+      "title": "最近交易",
+      "subtitle": "查看最近 5 条模拟成交记录。",
+      "empty": "还没有最近交易记录。"
+    },
+    "watchlist": {
+      "title": "自选股快照",
+      "subtitle": "快速查看你关注股票的最新表现。",
+      "empty": "还没有自选股行情。"
+    },
+    "errors": {
+      "load": "加载首页数据失败。",
+      "refresh": "刷新首页数据失败。"
+    }
   },
   "market": {
     "title": "行情",

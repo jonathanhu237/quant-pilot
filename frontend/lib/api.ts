@@ -76,6 +76,33 @@ export type TradeRequest = {
   shares: number;
 };
 
+export type DashboardAccountSummary = {
+  total_assets: number;
+  total_return_rate: number;
+};
+
+export type DashboardTrade = {
+  id: number;
+  side: 'buy' | 'sell';
+  symbol: string;
+  shares: number;
+  price: number;
+  created_at: string;
+};
+
+export type DashboardWatchlistQuote = {
+  symbol: string;
+  name: string;
+  price: number;
+  change_pct: number;
+};
+
+export type DashboardResponse = {
+  account_summary: DashboardAccountSummary;
+  recent_trades: DashboardTrade[];
+  watchlist_quotes: DashboardWatchlistQuote[];
+};
+
 type WatchlistItem = {
   symbol: string;
 };
@@ -179,4 +206,8 @@ export async function sellStock(payload: TradeRequest): Promise<void> {
 
 export async function getTradeHistory(): Promise<TradingTrade[]> {
   return request<TradingTrade[]>('/api/trading/history');
+}
+
+export async function getDashboard(): Promise<DashboardResponse> {
+  return request<DashboardResponse>('/api/dashboard');
 }

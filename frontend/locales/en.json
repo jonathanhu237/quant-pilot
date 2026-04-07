@@ -8,7 +8,26 @@
   },
   "home": {
     "title": "Quant Pilot",
-    "subtitle": "Strategy highlights and daily summary."
+    "subtitle": "Start with your account snapshot, latest trades, and watchlist momentum.",
+    "loading": "Loading dashboard...",
+    "account": {
+      "title": "Paper Account",
+      "cta": "Open paper trading"
+    },
+    "recentTrades": {
+      "title": "Recent Trades",
+      "subtitle": "Your latest simulated executions.",
+      "empty": "No recent trades yet."
+    },
+    "watchlist": {
+      "title": "Watchlist Snapshot",
+      "subtitle": "A quick read on the symbols you track most.",
+      "empty": "No watchlist quotes yet."
+    },
+    "errors": {
+      "load": "Failed to load dashboard.",
+      "refresh": "Failed to refresh dashboard."
+    }
   },
   "market": {
     "title": "Market",

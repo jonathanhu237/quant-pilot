@@ -1,3 +1,4 @@
+from .dashboard import AccountSummary, DashboardResponse, WatchlistQuoteSnapshot
 from .market import StockQuote
 from .strategy import (
     BacktestRequest,
@@ -15,9 +16,11 @@ from .trading import (
 from .watchlist import WatchlistCreate, WatchlistResponse
 
 __all__ = [
+    "AccountSummary",
     "AccountResponse",
     "BacktestRequest",
     "BacktestResult",
+    "DashboardResponse",
     "PositionResponse",
     "StockQuote",
     "StrategyMeta",
@@ -26,5 +29,6 @@ __all__ = [
     "TradeRequest",
     "TradeResponse",
     "WatchlistCreate",
+    "WatchlistQuoteSnapshot",
     "WatchlistResponse",
 ]

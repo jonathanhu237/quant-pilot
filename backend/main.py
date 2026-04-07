@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
+from routers.dashboard import router as dashboard_router
 from routers.market import router as market_router
 from routers.strategy import router as strategy_router
 from routers.trading import router as trading_router
@@ -29,6 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(market_router, prefix="/api/market", tags=["market"])
 app.include_router(strategy_router, prefix="/api/strategy", tags=["strategy"])
 app.include_router(trading_router, prefix="/api/trading", tags=["trading"])
