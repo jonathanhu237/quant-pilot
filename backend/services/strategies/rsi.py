@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from schemas.strategy import StrategyParameterDefinition
@@ -50,7 +51,7 @@ class RSIStrategy(BaseStrategy):
 
         average_gain = gains.rolling(window=period, min_periods=period).mean()
         average_loss = losses.rolling(window=period, min_periods=period).mean()
-        relative_strength = average_gain / average_loss.replace(0, pd.NA)
+        relative_strength = average_gain / average_loss.replace(0, np.nan)
         rsi = 100 - (100 / (1 + relative_strength))
 
         signals = pd.Series(0, index=data.index, dtype=int)

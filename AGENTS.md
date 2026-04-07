@@ -25,6 +25,7 @@ Claude → PLAN.md → Codex → SUMMARY.md → Claude → REVIEW.md → Codex (
 
 2. **Codex implements** according to `PLAN.md`, then writes `SUMMARY.md` to the project root.
    - `SUMMARY.md` must cover: what was done, what was verified, any blockers or deviations from the plan.
+   - **Codex must execute the verification steps listed in `PLAN.md` before writing `SUMMARY.md`.** Do not describe what "should" work — run the actual commands and report real output. Unverified code is not complete.
 
 3. **Claude reviews** the implementation against `PLAN.md` and `SUMMARY.md`, then writes `REVIEW.md` to the project root.
    - `REVIEW.md` must include: verdict (LGTM / issues found), what Codex did well, and each issue with file + line reference and a concrete fix.
@@ -96,7 +97,7 @@ Its main goal is to help users understand quantitative strategies, monitor marke
 - **Framework:** Python + FastAPI (async)
 - **Database:** PostgreSQL, launched via `docker-compose.yml`
 - **ORM:** SQLAlchemy (async) + Alembic for migrations
-- **Market data:** akshare (A-share focused, free, no token required)
+- **Market data:** Tencent Finance API (real-time quotes + historical kline), no token required. akshare is no longer used.
 - **Package manager:** uv
 
 ---

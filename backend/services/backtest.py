@@ -1,8 +1,10 @@
+import json
+import re
 from datetime import date
 
-import akshare as ak
 import numpy as np
 import pandas as pd
+import requests
 
 from schemas.strategy import BacktestRequest, BacktestResult, StrategyMeta
 from services.strategies.base import BaseStrategy
@@ -26,26 +28,60 @@ def get_strategy_class(strategy_id: str) -> type[BaseStrategy]:
     return strategy_class
 
 
-def fetch_historical_data(symbol: str, start_date: date, end_date: date) -> pd.DataFrame:
-    history = ak.stock_zh_a_hist(
-        symbol=symbol,
-        period="daily",
-        start_date=start_date.strftime("%Y%m%d"),
-        end_date=end_date.strftime("%Y%m%d"),
-    )
+def _fetch_kline_page(
+    full_symbol: str, start_date: date, end_date: date
+) -> list[list[str]]:
+    """Fetch one page (up to 640 rows) of front-adjusted daily kline data."""
+    url = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get"
+    params = {
+        "_var": "kline_data",
+        "param": f"{full_symbol},day,{start_date.strftime('%Y-%m-%d')},{end_date.strftime('%Y-%m-%d')},640,qfq",
+    }
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    json_str = re.sub(r"^[^=]+=", "", response.text).strip()
+    payload = json.loads(json_str)
+    rows = payload["data"][full_symbol].get("qfqday", [])
+    # Some rows (ex-dividend days) have a 7th dict element — keep only first 6
+    return [r[:6] for r in rows if len(r) >= 6]
 
-    if history.empty:
+
+def fetch_historical_data(symbol: str, start_date: date, end_date: date) -> pd.DataFrame:
+    from datetime import timedelta
+
+    market = "sh" if symbol.startswith(("6", "9")) else "sz"
+    full_symbol = f"{market}{symbol}"
+
+    # Paginate backwards: each page ≤ 640 rows; 5y ≈ 1250 rows → 2 pages max
+    all_rows: list[list[str]] = []
+    current_end = end_date
+    seen: set[str] = set()
+
+    while True:
+        page = _fetch_kline_page(full_symbol, start_date, current_end)
+        if not page:
+            break
+        for row in page:
+            if row[0] not in seen:
+                seen.add(row[0])
+                all_rows.append(row)
+        # If earliest row in this page is at or before start_date, we're done
+        if page[0][0] <= start_date.strftime("%Y-%m-%d"):
+            break
+        current_end = date.fromisoformat(page[0][0]) - timedelta(days=1)
+
+    if not all_rows:
         raise ValueError("No historical data available for the selected symbol and time range")
 
-    prepared = history.rename(columns={"日期": "date", "收盘": "close"}).copy()
-    prepared["date"] = pd.to_datetime(prepared["date"])
-    prepared["close"] = pd.to_numeric(prepared["close"], errors="coerce")
-    prepared = prepared.dropna(subset=["close"]).sort_values("date").reset_index(drop=True)
+    df = pd.DataFrame(all_rows, columns=["date", "open", "close", "high", "low", "volume"])
+    df["date"] = pd.to_datetime(df["date"])
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna(subset=["close"]).sort_values("date").reset_index(drop=True)
 
-    if prepared.empty or len(prepared) < 2:
+    if len(df) < 2:
         raise ValueError("Not enough historical data to run a backtest")
 
-    return prepared[["date", "close"]]
+    return df[["date", "close"]]
 
 
 def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, float | int]:
