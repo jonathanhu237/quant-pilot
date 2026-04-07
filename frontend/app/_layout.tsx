@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
 import { colorScheme, useColorScheme } from 'nativewind';
@@ -73,15 +74,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={theme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: 'modal', title: t('modal.title') }}
-        />
-      </Stack>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <View className={`flex-1 ${isDark ? 'dark' : ''}`}>
+      <ThemeProvider value={theme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: 'modal', title: t('modal.title') }}
+          />
+        </Stack>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </View>
   );
 }
