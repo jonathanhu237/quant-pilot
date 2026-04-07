@@ -5,9 +5,12 @@ import { initReactI18next } from 'react-i18next';
 import en from '@/locales/en.json';
 import zhCN from '@/locales/zh-CN.json';
 
-function normalizeLanguageTag(languageTag?: string) {
+export const LANGUAGE_STORAGE_KEY = 'quantpilot.language';
+export const DEFAULT_LANGUAGE = 'en';
+
+export function normalizeLanguageTag(languageTag?: string) {
   if (!languageTag) {
-    return 'en';
+    return DEFAULT_LANGUAGE;
   }
 
   return languageTag.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en';
@@ -28,7 +31,7 @@ if (!i18n.isInitialized) {
   void i18n.use(initReactI18next).init({
     resources,
     lng: normalizeLanguageTag(getLocales()[0]?.languageTag),
-    fallbackLng: 'en',
+    fallbackLng: DEFAULT_LANGUAGE,
     supportedLngs: ['en', 'zh-CN'],
     interpolation: {
       escapeValue: false,

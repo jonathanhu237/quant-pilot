@@ -1,12 +1,13 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 
-import '@/lib/i18n';
+import i18n, { LANGUAGE_STORAGE_KEY, normalizeLanguageTag } from '@/lib/i18n';
 import '../global.css';
 
 export const unstable_settings = {
@@ -15,9 +16,28 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const { t } = useTranslation();
+  const [isLanguageReady, setIsLanguageReady] = useState(false);
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync('#0F0F14');
+  }, []);
+
+  useEffect(() => {
+    async function restoreLanguagePreference() {
+      try {
+        const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (storedLanguage) {
+          const nextLanguage = normalizeLanguageTag(storedLanguage);
+          if (nextLanguage !== i18n.language) {
+            await i18n.changeLanguage(nextLanguage);
+          }
+        }
+      } finally {
+        setIsLanguageReady(true);
+      }
+    }
+
+    void restoreLanguagePreference();
   }, []);
 
   const theme = {
@@ -32,6 +52,10 @@ export default function RootLayout() {
       notification: '#FF4D4D',
     },
   };
+
+  if (!isLanguageReady) {
+    return null;
+  }
 
   return (
     <ThemeProvider value={theme}>

@@ -3,11 +3,10 @@
     "home": "首页",
     "market": "行情",
     "strategy": "策略",
-    "trading": "交易",
-    "ai": "AI"
+    "trading": "交易"
   },
   "home": {
-    "title": "量化飞行员",
+    "title": "QuantPilot",
     "subtitle": "先看账户快照、最近交易和自选股动向。",
     "loading": "正在加载首页数据...",
     "account": {
@@ -149,10 +148,6 @@
       "invalidSymbol": "请输入有效的 6 位 A 股代码。",
       "invalidShares": "请输入有效的股数。"
     }
-  },
-  "ai": {
-    "title": "AI 助手",
-    "subtitle": "就策略和组合表现提出问题。"
   },
   "modal": {
     "title": "这是一个弹窗",

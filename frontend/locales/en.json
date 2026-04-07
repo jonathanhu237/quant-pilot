@@ -3,11 +3,10 @@
     "home": "Home",
     "market": "Market",
     "strategy": "Strategy",
-    "trading": "Trading",
-    "ai": "AI"
+    "trading": "Trading"
   },
   "home": {
-    "title": "Quant Pilot",
+    "title": "QuantPilot",
     "subtitle": "Start with your account snapshot, latest trades, and watchlist momentum.",
     "loading": "Loading dashboard...",
     "account": {
@@ -149,10 +148,6 @@
       "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
       "invalidShares": "Please enter a valid number of shares."
     }
-  },
-  "ai": {
-    "title": "AI Assistant",
-    "subtitle": "Ask questions about strategies and portfolio performance."
   },
   "modal": {
     "title": "This is a modal",

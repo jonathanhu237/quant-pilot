@@ -7,10 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
 import {
   getDashboard,
   type DashboardResponse,
@@ -86,7 +88,7 @@ function QuoteRow({
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -123,6 +125,12 @@ export default function HomeScreen() {
     }
   }
 
+  async function toggleLanguage() {
+    const nextLanguage = i18n.language.toLowerCase().startsWith('zh') ? 'en' : 'zh-CN';
+    await i18n.changeLanguage(nextLanguage);
+    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+  }
+
   if (loading || dashboard === null) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
@@ -138,7 +146,18 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 32 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />}>
       <View className="px-5">
-        <Text className="text-3xl font-bold text-primary">{t('home.title')}</Text>
+        <View className="flex-row items-start justify-between gap-4">
+          <Text className="flex-1 text-3xl font-bold text-primary">{t('home.title')}</Text>
+          <Pressable
+            className="rounded-full bg-surface px-3 py-1 active:opacity-80"
+            onPress={() => {
+              void toggleLanguage();
+            }}>
+            <Text className="font-semibold text-accent">
+              {i18n.language.toLowerCase().startsWith('zh') ? 'EN' : '中'}
+            </Text>
+          </Pressable>
+        </View>
         <Text className="mt-2 text-sm leading-5 text-secondary">{t('home.subtitle')}</Text>
 
         {error ? <Text className="mt-4 text-sm text-error">{error}</Text> : null}

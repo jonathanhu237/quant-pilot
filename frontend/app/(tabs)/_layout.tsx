@@ -58,19 +58,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="ai"
-        options={{
-          title: t('tabs.ai'),
-          tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name="bubble.left.and.bubble.right.fill"
-              color={color}
-            />
-          ),
-        }}
-      />
     </Tabs>
   );
 }
