@@ -30,8 +30,9 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
+          href: '/',
           title: t('tabs.home'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
@@ -39,6 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="market"
         options={{
+          href: '/market',
           title: t('tabs.market'),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="chart.line.uptrend.xyaxis" color={color} />
@@ -48,6 +50,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="strategy"
         options={{
+          href: '/strategy',
           title: t('tabs.strategy'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="lightbulb.fill" color={color} />,
         }}
@@ -55,6 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="paper-trading"
         options={{
+          href: '/paper-trading',
           title: t('tabs.trading'),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="dollarsign.circle.fill" color={color} />

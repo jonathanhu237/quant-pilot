@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 export type StockQuote = {
   symbol: string;
   name: string;
@@ -120,7 +118,7 @@ type RequestError = Error & {
   code?: string;
 };
 
-const HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const HOST = process.env.EXPO_OS === 'android' ? '10.0.2.2' : 'localhost';
 const BASE_URL = `http://${HOST}:8000`;
 
 function isStructuredErrorDetail(value: unknown): value is StructuredErrorDetail {

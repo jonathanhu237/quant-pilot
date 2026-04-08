@@ -1,4 +1,10 @@
 {
+  "common": {
+    "languageToggle": {
+      "english": "EN",
+      "chinese": "中"
+    }
+  },
   "tabs": {
     "home": "Home",
     "market": "Market",

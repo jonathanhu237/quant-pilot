@@ -20,6 +20,7 @@ const MAPPING = {
   'dollarsign.circle.fill': 'attach-money',
   'moon.fill': 'dark-mode',
   'sun.max.fill': 'wb-sunny',
+  plus: 'add',
   'bubble.left.and.bubble.right.fill': 'forum',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
