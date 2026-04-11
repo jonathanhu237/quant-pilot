@@ -14,7 +14,7 @@ from schemas.trading import TradeResponse
 from services.quotes import fetch_quotes as fetch_market_quotes
 from services.trading import INITIAL_CASH, build_account_response, get_or_create_account
 
-router = APIRouter()
+router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 

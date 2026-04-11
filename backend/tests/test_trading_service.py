@@ -260,7 +260,7 @@ async def test_buy_endpoint_returns_structured_error_detail(
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
-    app.include_router(trading_router, prefix="/api/trading")
+    app.include_router(trading_router)
 
     async with AsyncClient(
         transport=ASGITransport(app=app),

@@ -30,13 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
-app.include_router(market_router, prefix="/api/market", tags=["market"])
-app.include_router(strategy_router, prefix="/api/strategy", tags=["strategy"])
-app.include_router(trading_router, prefix="/api/trading", tags=["trading"])
-app.include_router(watchlist_router, prefix="/api/watchlist", tags=["watchlist"])
+app.include_router(dashboard_router)
+app.include_router(market_router)
+app.include_router(strategy_router)
+app.include_router(trading_router)
+app.include_router(watchlist_router)
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
+def health_check() -> dict[str, str]:
     return {"status": "ok"}

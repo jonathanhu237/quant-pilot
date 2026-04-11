@@ -9,7 +9,7 @@ from database import get_db
 from models.watchlist import Watchlist
 from schemas.watchlist import WatchlistCreate, WatchlistResponse
 
-router = APIRouter()
+router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 

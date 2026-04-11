@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 from schemas.strategy import BacktestRequest, BacktestResult, StrategyMeta
 from services.backtest import list_strategy_metadata, run_backtest
 
-router = APIRouter()
+router = APIRouter(prefix="/api/strategy", tags=["strategy"])
 
 
 @router.get("/", response_model=list[StrategyMeta])
-async def list_strategies() -> list[StrategyMeta]:
+def list_strategies() -> list[StrategyMeta]:
     return list_strategy_metadata()
 
 

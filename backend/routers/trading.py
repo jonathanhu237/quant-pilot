@@ -14,7 +14,7 @@ from schemas.trading import (
 )
 from services.trading import build_account_response, execute_trade
 
-router = APIRouter()
+router = APIRouter(prefix="/api/trading", tags=["trading"])
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 
