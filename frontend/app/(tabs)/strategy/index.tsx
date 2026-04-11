@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { NumericText } from '@/components/numeric-text';
 import { PillSelector } from '@/components/pill-selector';
 import { SectionCard } from '@/components/section-card';
+import { SkeletonBlock } from '@/components/skeleton-block';
 import {
   getStrategies,
   runBacktest,
@@ -71,7 +72,6 @@ export default function StrategyScreen() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const accentColor = '#5E6AD2';
   const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
   const reducedMotion = useReducedMotion();
 
@@ -212,10 +212,31 @@ export default function StrategyScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={accentColor} />
-        <Text className="mt-3 text-base text-secondary">{t('strategy.loading')}</Text>
-      </View>
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          gap: 24,
+          paddingBottom: 32,
+          paddingHorizontal: 20,
+          paddingTop: 8,
+        }}
+        contentInsetAdjustmentBehavior="automatic">
+        <SkeletonBlock className="h-4 w-64 rounded-full" />
+
+        <View className="gap-3">
+          {[0, 1].map((index) => (
+            <View
+              key={`strategy-skeleton-${index}`}
+              className="rounded-3xl border border-divider bg-surface/70 px-4 py-4"
+              style={{ borderCurve: 'continuous' }}>
+              <SkeletonBlock className="h-6 w-36 rounded-full" />
+              <SkeletonBlock className="mt-3 h-4 w-full rounded-full bg-background/70" />
+              <SkeletonBlock className="mt-2 h-4 w-5/6 rounded-full bg-background/70" />
+              <SkeletonBlock className="mt-4 h-4 w-24 rounded-full" />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     );
   }
 

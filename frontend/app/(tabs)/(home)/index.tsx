@@ -1,7 +1,6 @@
 import { Link } from 'expo-router';
 import { memo, useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -18,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
 import { SectionCard } from '@/components/section-card';
+import { SkeletonBlock } from '@/components/skeleton-block';
 import {
   getDashboard,
   type DashboardResponse,
@@ -117,7 +117,6 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const accentColor = '#5E6AD2';
   const reducedMotion = useReducedMotion();
 
   const loadDashboard = useCallback(async () => {
@@ -153,10 +152,78 @@ export default function HomeScreen() {
 
   if (loading || dashboard === null) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background">
-        <ActivityIndicator color={accentColor} />
-        <Text className="text-base text-secondary">{t('home.loading')}</Text>
-      </View>
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          gap: 24,
+          paddingBottom: 32,
+          paddingHorizontal: 20,
+          paddingTop: 8,
+        }}
+        contentInsetAdjustmentBehavior="automatic">
+        <SkeletonBlock className="h-4 w-56 rounded-full" />
+
+        <View className="gap-4 rounded-3xl bg-surface px-4 py-5" style={{ borderCurve: 'continuous' }}>
+          <View className="flex-row items-start justify-between gap-4">
+            <View className="flex-1 gap-3">
+              <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+              <SkeletonBlock className="h-10 w-44 rounded-2xl bg-background/70" />
+            </View>
+            <SkeletonBlock className="mt-1 h-6 w-20 rounded-full bg-background/70" />
+          </View>
+          <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+        </View>
+
+        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+          <View className="gap-2 px-4 pt-5">
+            <SkeletonBlock className="h-6 w-40 rounded-full bg-background/70" />
+            <SkeletonBlock className="h-4 w-52 rounded-full bg-background/70" />
+          </View>
+          <View className="pb-1">
+            {[0, 1, 2].map((index) => (
+              <View
+                key={`trade-skeleton-${index}`}
+                className={`flex-row items-start justify-between px-4 py-4 ${
+                  index === 0 ? '' : 'border-t border-divider'
+                }`}>
+                <View className="flex-1 gap-2 pr-4">
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                </View>
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+          <View className="gap-2 px-4 pt-5">
+            <SkeletonBlock className="h-6 w-44 rounded-full bg-background/70" />
+            <SkeletonBlock className="h-4 w-56 rounded-full bg-background/70" />
+          </View>
+          <View className="pb-1">
+            {[0, 1, 2].map((index) => (
+              <View
+                key={`quote-skeleton-${index}`}
+                className={`flex-row items-center justify-between px-4 py-4 ${
+                  index === 0 ? '' : 'border-t border-divider'
+                }`}>
+                <View className="flex-1 gap-2 pr-4">
+                  <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                </View>
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-5 w-20 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     );
   }
 
@@ -166,7 +233,7 @@ export default function HomeScreen() {
       contentContainerStyle={{ gap: 24, paddingBottom: 32, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
       }>
       <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
         <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>

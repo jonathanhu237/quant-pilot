@@ -1,10 +1,10 @@
 import { memo, useCallback, useDeferredValue, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   View,
   type ListRenderItemInfo,
@@ -19,6 +19,7 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
+import { SkeletonBlock } from '@/components/skeleton-block';
 import { getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
 import { setMarketSearchQuery, useMarketSearchQuery } from '@/lib/market-search';
 
@@ -112,7 +113,6 @@ export default function MarketScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const accentColor = '#5E6AD2';
   const reducedMotion = useReducedMotion();
   const searchQuery = useMarketSearchQuery();
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -193,12 +193,12 @@ export default function MarketScreen() {
   const handleDeleteSymbol = useCallback(async (symbol: string) => {
     try {
       await removeFromWatchlist(symbol);
+      if (process.env.EXPO_OS === 'ios') {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
       const nextMarket = await fetchMarket();
       setRows(nextMarket.rows);
       setError(nextMarket.error);
-      if (process.env.EXPO_OS === 'ios') {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : t('market.errors.delete'));
     }
@@ -233,10 +233,35 @@ export default function MarketScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background">
-        <ActivityIndicator color={accentColor} />
-        <Text className="text-base text-secondary">{t('market.loading')}</Text>
-      </View>
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          gap: 0,
+          paddingBottom: 32,
+          paddingHorizontal: 20,
+          paddingTop: 8,
+        }}
+        contentInsetAdjustmentBehavior="automatic">
+        <View className="pb-6">
+          <SkeletonBlock className="h-4 w-48 rounded-full" />
+        </View>
+        {[0, 1, 2, 3, 4].map((index) => (
+          <View
+            key={`market-skeleton-${index}`}
+            className={`flex-row items-center gap-3 py-4 ${
+              index === 0 ? '' : 'border-t border-divider'
+            }`}>
+            <View className="flex-1 gap-2">
+              <SkeletonBlock className="h-4 w-28 rounded-full" />
+              <SkeletonBlock className="h-4 w-16 rounded-full" />
+            </View>
+            <View className="items-end gap-2">
+              <SkeletonBlock className="h-5 w-20 rounded-full" />
+              <SkeletonBlock className="h-4 w-16 rounded-full" />
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     );
   }
 
@@ -277,7 +302,7 @@ export default function MarketScreen() {
         </View>
       }
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
       }
       renderItem={renderItem}
     />

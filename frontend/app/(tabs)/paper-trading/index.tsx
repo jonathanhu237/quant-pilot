@@ -1,11 +1,5 @@
 import { memo, useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
   FadeIn,
@@ -18,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { NumericText } from '@/components/numeric-text';
 import { PillSelector } from '@/components/pill-selector';
 import { SectionCard } from '@/components/section-card';
+import { SkeletonBlock } from '@/components/skeleton-block';
 import {
   getTradeHistory,
   getTradingAccount,
@@ -155,7 +150,6 @@ export default function PaperTradingScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TradingTab>('positions');
-  const accentColor = '#5E6AD2';
   const reducedMotion = useReducedMotion();
 
   const fetchTradingData = useCallback(async () => {
@@ -218,10 +212,63 @@ export default function PaperTradingScreen() {
 
   if (loading || account === null) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={accentColor} />
-        <Text className="mt-3 text-base text-secondary">{t('paperTrading.loading')}</Text>
-      </View>
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          gap: 24,
+          paddingBottom: 40,
+          paddingHorizontal: 20,
+          paddingTop: 8,
+        }}
+        contentInsetAdjustmentBehavior="automatic">
+        <SkeletonBlock className="h-4 w-56 rounded-full" />
+
+        <SectionCard bodyClassName="px-4 py-5">
+          <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+          <SkeletonBlock className="mt-3 h-10 w-44 rounded-2xl bg-background/70" />
+
+          <View className="mt-5 flex-row flex-wrap justify-between gap-y-4">
+            {[0, 1, 2, 3].map((index) => (
+              <View key={`summary-skeleton-${index}`} className="w-[48%] gap-2">
+                <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                <SkeletonBlock className="h-6 w-28 rounded-full bg-background/70" />
+              </View>
+            ))}
+          </View>
+        </SectionCard>
+
+        <View className="flex-row gap-3">
+          <SkeletonBlock className="h-11 flex-1 rounded-full" />
+          <SkeletonBlock className="h-11 flex-1 rounded-full" />
+        </View>
+
+        <SectionCard>
+          {[0, 1].map((index) => (
+            <View
+              key={`paper-row-skeleton-${index}`}
+              className={`px-4 py-4 ${index === 0 ? '' : 'border-t border-divider'}`}>
+              <View className="flex-row items-start justify-between gap-4">
+                <View className="flex-1 gap-2 pr-4">
+                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                </View>
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-5 w-16 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                </View>
+              </View>
+              <View className="mt-4 flex-row flex-wrap justify-between gap-y-3">
+                {[0, 1, 2].map((statIndex) => (
+                  <View key={`paper-stat-skeleton-${index}-${statIndex}`} className="w-[32%] gap-2">
+                    <SkeletonBlock className="h-3 w-16 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
+        </SectionCard>
+      </ScrollView>
     );
   }
 
@@ -231,7 +278,7 @@ export default function PaperTradingScreen() {
       contentContainerStyle={{ gap: 24, paddingBottom: 40, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
       }>
       <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
         <Text className="text-sm leading-6 text-secondary">{t('paperTrading.subtitle')}</Text>
@@ -292,10 +339,10 @@ export default function PaperTradingScreen() {
       <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(80)}>
         <PillSelector
           onChange={setActiveTab}
-          options={([
+          options={[
             { label: t('paperTrading.tabs.positions'), value: 'positions' },
             { label: t('paperTrading.tabs.history'), value: 'history' },
-          ] as const).map((option) => option)}
+          ]}
           selectedValue={activeTab}
           unselectedLabelClassName="text-secondary"
         />

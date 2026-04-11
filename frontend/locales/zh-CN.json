@@ -39,7 +39,6 @@
   "home": {
     "title": "QuantPilot",
     "subtitle": "先看账户快照、最近交易和自选股动向。",
-    "loading": "正在加载首页数据...",
     "account": {
       "title": "模拟账户",
       "cta": "前往模拟交易"
@@ -62,7 +61,6 @@
   "market": {
     "title": "行情",
     "subtitle": "实时追踪你的 A 股自选股。",
-    "loading": "正在加载行情数据...",
     "emptyTitle": "还没有自选股",
     "emptySubtitle": "添加一个 6 位 A 股代码开始追踪行情。",
     "searchPlaceholder": "搜索股票...",
@@ -85,7 +83,6 @@
   "strategy": {
     "title": "策略中心",
     "subtitle": "查看内置量化策略、配置参数，并快速运行回测。",
-    "loading": "正在加载策略...",
     "runBacktest": "运行回测",
     "configureTitle": "配置 {{name}}",
     "symbolLabel": "股票代码",
@@ -136,7 +133,6 @@
   "paperTrading": {
     "title": "模拟交易",
     "subtitle": "管理你的虚拟账户、持仓和成交记录。",
-    "loading": "正在加载交易账户...",
     "tradeButton": "交易",
     "sharesUnit": "股",
     "tabs": {
