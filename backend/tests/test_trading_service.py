@@ -1,16 +1,13 @@
 from collections.abc import AsyncIterator
 
 import pytest
-import pytest_asyncio
 from fastapi import FastAPI
 from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import models.trading  # noqa: F401
-from database import Base, get_db
+from database import get_db
 from models.trading import Account, Position
 from routers.trading import router as trading_router
 from schemas.market import StockQuote
@@ -40,29 +37,6 @@ def patch_quote_map(
         }
 
     monkeypatch.setattr(trading_service, "fetch_quote_map", fake_fetch_quote_map)
-
-
-@pytest_asyncio.fixture
-async def db_session() -> AsyncIterator[AsyncSession]:
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    session_factory = async_sessionmaker(
-        bind=engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    async with session_factory() as session:
-        yield session
-
-    await engine.dispose()
-
 
 @pytest.mark.asyncio
 async def test_buy_decreases_cash_and_creates_position(
@@ -278,3 +252,213 @@ async def test_buy_endpoint_returns_structured_error_detail(
             "message": "Insufficient cash balance",
         }
     }
+
+
+@pytest.mark.asyncio
+async def test_buy_endpoint_succeeds(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    patch_quote_map(monkeypatch, {"600519": 10.0})
+
+    response = await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 100},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "side": "buy",
+        "symbol": "600519",
+        "shares": 100,
+        "price": 10.0,
+        "cash_balance": 99000.0,
+    }
+
+
+@pytest.mark.asyncio
+async def test_sell_endpoint_succeeds_after_buy(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prices = {"600519": 10.0}
+    patch_quote_map(monkeypatch, prices)
+
+    await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 100},
+    )
+
+    prices["600519"] = 12.0
+    response = await client.post(
+        "/api/trading/sell",
+        json={"symbol": "600519", "shares": 40},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "side": "sell",
+        "symbol": "600519",
+        "shares": 40,
+        "price": 12.0,
+        "cash_balance": 99480.0,
+    }
+
+
+@pytest.mark.asyncio
+async def test_sell_endpoint_rejects_missing_position(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    patch_quote_map(monkeypatch, {"600519": 10.0})
+
+    response = await client.post(
+        "/api/trading/sell",
+        json={"symbol": "600519", "shares": 10},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": {
+            "error_code": "insufficient_position",
+            "message": "Insufficient position size",
+        }
+    }
+
+
+@pytest.mark.asyncio
+async def test_buy_endpoint_returns_not_found_when_quote_is_missing(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    patch_quote_map(monkeypatch, {})
+
+    response = await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 100},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": {
+            "error_code": "quote_unavailable",
+            "message": "Live quote not available for the selected symbol",
+        }
+    }
+
+
+@pytest.mark.asyncio
+async def test_get_account_endpoint_returns_initial_account(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    patch_quote_map(monkeypatch, {})
+
+    response = await client.get("/api/trading/account")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "cash_balance": 100000.0,
+        "market_value": 0.0,
+        "total_assets": 100000.0,
+        "total_pnl": 0.0,
+        "total_return_rate": 0.0,
+        "positions": [],
+    }
+
+
+@pytest.mark.asyncio
+async def test_get_account_endpoint_uses_latest_quote_for_position_values(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prices = {"600519": 10.0}
+    patch_quote_map(monkeypatch, prices)
+
+    await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 100},
+    )
+
+    prices["600519"] = 12.0
+    response = await client.get("/api/trading/account")
+
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["cash_balance"] == pytest.approx(99000.0)
+    assert payload["market_value"] == pytest.approx(1200.0)
+    assert payload["total_assets"] == pytest.approx(100200.0)
+    assert payload["total_pnl"] == pytest.approx(200.0)
+    assert payload["total_return_rate"] == pytest.approx(0.002)
+    assert payload["positions"] == [
+        {
+            "symbol": "600519",
+            "name": "Quote 600519",
+            "shares": 100,
+            "average_cost": 10.0,
+            "current_price": 12.0,
+            "market_value": 1200.0,
+            "unrealized_pnl": 200.0,
+            "unrealized_pnl_pct": 0.2,
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_get_trade_history_endpoint_returns_empty_list_initially(
+    client: AsyncClient,
+) -> None:
+    response = await client.get("/api/trading/history")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.asyncio
+async def test_get_trade_history_endpoint_returns_reverse_chronological_order(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prices = {"600519": 10.0}
+    patch_quote_map(monkeypatch, prices)
+
+    await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 100},
+    )
+
+    prices["600519"] = 12.0
+    await client.post(
+        "/api/trading/sell",
+        json={"symbol": "600519", "shares": 40},
+    )
+
+    response = await client.get("/api/trading/history")
+
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert len(payload) == 2
+    assert [trade["side"] for trade in payload] == ["sell", "buy"]
+    assert [trade["symbol"] for trade in payload] == ["600519", "600519"]
+
+
+@pytest.mark.asyncio
+async def test_buy_endpoint_rejects_invalid_symbol(client: AsyncClient) -> None:
+    response = await client.post(
+        "/api/trading/buy",
+        json={"symbol": "INVALID", "shares": 100},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_buy_endpoint_rejects_non_positive_shares(client: AsyncClient) -> None:
+    response = await client.post(
+        "/api/trading/buy",
+        json={"symbol": "600519", "shares": 0},
+    )
+
+    assert response.status_code == 422
