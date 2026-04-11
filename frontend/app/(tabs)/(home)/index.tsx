@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -8,7 +8,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
@@ -32,29 +37,31 @@ function formatPercent(value: number) {
   return `${prefix}${(value * 100).toFixed(2)}%`;
 }
 
-function TradeRow({
+const TradeRow = memo(function TradeRow({
   index,
-  t,
+  reducedMotion,
+  sharesUnitLabel,
+  sideLabel,
   trade,
 }: {
   index: number;
-  t: ReturnType<typeof useTranslation>['t'];
+  reducedMotion: boolean;
+  sharesUnitLabel: string;
+  sideLabel: string;
   trade: DashboardTrade;
 }) {
   return (
     <Animated.View
-      entering={FadeIn.duration(220).delay(Math.min(index * 40, 180))}
-      layout={LinearTransition.duration(220)}
+      entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 180))}
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
       className={`flex-row items-start justify-between px-4 py-4 ${
         index === 0 ? '' : 'border-t border-divider'
       }`}>
       <View className="flex-1 gap-1 pr-4">
-        <Text className="text-base font-semibold text-accent">
-          {t(`paperTrading.tradeSide.${trade.side}`)}
-        </Text>
+        <Text className="text-base font-semibold text-accent">{sideLabel}</Text>
         <NumericText className="text-sm text-secondary">
           {trade.symbol} · {trade.shares}
-          {t('paperTrading.sharesUnit')}
+          {sharesUnitLabel}
         </NumericText>
       </View>
       <View className="items-end gap-1">
@@ -67,13 +74,21 @@ function TradeRow({
       </View>
     </Animated.View>
   );
-}
+});
 
-function QuoteRow({ index, quote }: { index: number; quote: DashboardWatchlistQuote }) {
+const QuoteRow = memo(function QuoteRow({
+  index,
+  quote,
+  reducedMotion,
+}: {
+  index: number;
+  quote: DashboardWatchlistQuote;
+  reducedMotion: boolean;
+}) {
   return (
     <Animated.View
-      entering={FadeIn.duration(220).delay(Math.min(index * 40, 180))}
-      layout={LinearTransition.duration(220)}
+      entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 180))}
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
       className={`flex-row items-center justify-between px-4 py-4 ${
         index === 0 ? '' : 'border-t border-divider'
       }`}>
@@ -94,7 +109,7 @@ function QuoteRow({ index, quote }: { index: number; quote: DashboardWatchlistQu
       </View>
     </Animated.View>
   );
-}
+});
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -103,6 +118,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const accentColor = '#5E6AD2';
+  const reducedMotion = useReducedMotion();
 
   const loadDashboard = useCallback(async () => {
     setError(null);
@@ -152,23 +168,26 @@ export default function HomeScreen() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
       }>
-      <Animated.View entering={FadeIn.duration(220)}>
+      <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
         <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>
       </Animated.View>
 
       {error ? (
         <Animated.Text
           className="text-sm text-error"
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(160)}
+          entering={reducedMotion ? undefined : FadeIn.duration(200)}
+          exiting={reducedMotion ? undefined : FadeOut.duration(160)}
           selectable>
           {error}
         </Animated.Text>
       ) : null}
 
-      <Animated.View entering={FadeIn.duration(240).delay(40)}>
+      <Animated.View
+        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
         <Link href="/paper-trading" asChild>
           <Pressable
+            accessibilityLabel={t('accessibility.home.openPaperTrading')}
+            accessibilityRole="button"
             className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
             style={{ borderCurve: 'continuous' }}>
             <View className="flex-row items-start justify-between gap-4">
@@ -189,7 +208,8 @@ export default function HomeScreen() {
         </Link>
       </Animated.View>
 
-      <Animated.View entering={FadeIn.duration(240).delay(80)}>
+      <Animated.View
+        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(80)}>
         <SectionCard
           subtitle={t('home.recentTrades.subtitle')}
           title={t('home.recentTrades.title')}>
@@ -201,13 +221,21 @@ export default function HomeScreen() {
             </View>
           ) : (
             dashboard.recent_trades.map((trade, index) => (
-              <TradeRow key={trade.id} index={index} t={t} trade={trade} />
+              <TradeRow
+                key={trade.id}
+                index={index}
+                reducedMotion={reducedMotion}
+                sharesUnitLabel={t('paperTrading.sharesUnit')}
+                sideLabel={t(`paperTrading.tradeSide.${trade.side}`)}
+                trade={trade}
+              />
             ))
           )}
         </SectionCard>
       </Animated.View>
 
-      <Animated.View entering={FadeIn.duration(240).delay(120)}>
+      <Animated.View
+        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(120)}>
         <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
           {dashboard.watchlist_quotes.length === 0 ? (
             <View className="px-4 py-8">
@@ -217,7 +245,12 @@ export default function HomeScreen() {
             </View>
           ) : (
             dashboard.watchlist_quotes.map((quote, index) => (
-              <QuoteRow key={quote.symbol} index={index} quote={quote} />
+              <QuoteRow
+                key={quote.symbol}
+                index={index}
+                quote={quote}
+                reducedMotion={reducedMotion}
+              />
             ))
           )}
         </SectionCard>

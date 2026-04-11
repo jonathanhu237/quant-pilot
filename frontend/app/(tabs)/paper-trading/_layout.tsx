@@ -20,6 +20,8 @@ export default function PaperTradingStackLayout() {
           headerRight: () => (
             <Link href="./new-trade" asChild>
               <Pressable
+                accessibilityLabel={t('accessibility.paperTrading.openTradeSheet')}
+                accessibilityRole="button"
                 className="min-h-11 items-center justify-center rounded-full bg-accent px-4 py-2 active:opacity-80"
                 hitSlop={4}
                 style={{ borderCurve: 'continuous' }}>

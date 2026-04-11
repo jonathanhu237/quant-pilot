@@ -16,6 +16,12 @@ export default function HomeStackLayout() {
   const nextLanguageLabel = i18n.language.toLowerCase().startsWith('zh')
     ? t('common.languageToggle.english')
     : t('common.languageToggle.chinese');
+  const languageAccessibilityLabel = i18n.language.toLowerCase().startsWith('zh')
+    ? t('accessibility.home.switchToEnglish')
+    : t('accessibility.home.switchToChinese');
+  const themeAccessibilityLabel = isDark
+    ? t('accessibility.home.switchToLightTheme')
+    : t('accessibility.home.switchToDarkTheme');
 
   async function toggleLanguage() {
     const nextLanguage = i18n.language.toLowerCase().startsWith('zh') ? 'en' : 'zh-CN';
@@ -38,6 +44,8 @@ export default function HomeStackLayout() {
           headerRight: () => (
             <View className="flex-row items-center gap-2">
               <Pressable
+                accessibilityLabel={languageAccessibilityLabel}
+                accessibilityRole="button"
                 className="h-11 min-w-11 items-center justify-center rounded-full bg-surface px-3 active:opacity-80"
                 hitSlop={4}
                 onPress={() => {
@@ -47,6 +55,8 @@ export default function HomeStackLayout() {
                 <Text className="text-sm font-semibold text-accent">{nextLanguageLabel}</Text>
               </Pressable>
               <Pressable
+                accessibilityLabel={themeAccessibilityLabel}
+                accessibilityRole="button"
                 className="h-11 w-11 items-center justify-center rounded-full bg-surface active:opacity-80"
                 hitSlop={4}
                 onPress={() => {

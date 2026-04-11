@@ -22,6 +22,8 @@ export default function MarketStackLayout() {
           headerRight: () => (
             <Link href="./add-symbol" asChild>
               <Pressable
+                accessibilityLabel={t('accessibility.market.addSymbol')}
+                accessibilityRole="button"
                 className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
                 hitSlop={4}
                 style={{ borderCurve: 'continuous' }}>

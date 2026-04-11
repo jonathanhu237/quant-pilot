@@ -5,6 +5,31 @@
       "chinese": "中"
     }
   },
+  "accessibility": {
+    "home": {
+      "switchToEnglish": "Switch language to English",
+      "switchToChinese": "Switch language to Simplified Chinese",
+      "switchToLightTheme": "Switch to light theme",
+      "switchToDarkTheme": "Switch to dark theme",
+      "openPaperTrading": "Open paper trading"
+    },
+    "market": {
+      "addSymbol": "Add symbol to watchlist",
+      "deleteSymbol": "Delete {{name}} {{symbol}} from watchlist",
+      "cancelAddSymbol": "Cancel adding symbol",
+      "confirmAddSymbol": "Add symbol to watchlist"
+    },
+    "paperTrading": {
+      "openTradeSheet": "Open trade sheet",
+      "cancelTrade": "Cancel trade",
+      "submitBuyTrade": "Submit buy trade",
+      "submitSellTrade": "Submit sell trade"
+    },
+    "strategy": {
+      "selectStrategy": "Select {{name}} strategy",
+      "runBacktest": "Run backtest"
+    }
+  },
   "tabs": {
     "home": "Home",
     "market": "Market",

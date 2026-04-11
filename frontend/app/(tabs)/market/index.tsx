@@ -1,4 +1,5 @@
-import { useCallback, useDeferredValue, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useState } from 'react';
+import * as Haptics from 'expo-haptics';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,14 +10,19 @@ import {
   type ListRenderItemInfo,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
 import { getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
 import { setMarketSearchQuery, useMarketSearchQuery } from '@/lib/market-search';
 
-type MarketRow = {
+type MarketRowData = {
   changePct: number | null;
   name: string;
   price: number | null;
@@ -27,7 +33,7 @@ function buildRows(
   symbols: string[],
   quotes: Awaited<ReturnType<typeof getQuotes>>,
   fallbackName: string
-) {
+): MarketRowData[] {
   const quoteMap = new Map(quotes.map((quote) => [quote.symbol, quote]));
 
   return symbols.map((symbol) => {
@@ -41,13 +47,73 @@ function buildRows(
   });
 }
 
+const MarketListRow = memo(function MarketListRow({
+  deleteAccessibilityLabel,
+  deleteLabel,
+  index,
+  item,
+  onDelete,
+  reducedMotion,
+}: {
+  deleteAccessibilityLabel: string;
+  deleteLabel: string;
+  index: number;
+  item: MarketRowData;
+  onDelete: (symbol: string) => void;
+  reducedMotion: boolean;
+}) {
+  function getChangeText(changePct: number | null) {
+    if (changePct === null) {
+      return '--';
+    }
+
+    return `${changePct > 0 ? '+' : ''}${changePct.toFixed(2)}%`;
+  }
+
+  return (
+    <Animated.View
+      entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 200))}
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
+      className={`flex-row items-center gap-3 py-4 ${
+        index === 0 ? '' : 'border-t border-divider'
+      }`}>
+      <View className="flex-1 gap-1">
+        <Text className="text-base font-semibold text-primary">{item.name}</Text>
+        <Text className="text-sm text-secondary" selectable>
+          {item.symbol}
+        </Text>
+      </View>
+      <View className="items-end gap-1">
+        <NumericText className="text-lg font-semibold text-primary">
+          {item.price === null ? '--' : item.price.toFixed(2)}
+        </NumericText>
+        <NumericText className="text-sm font-medium" toneValue={item.changePct}>
+          {getChangeText(item.changePct)}
+        </NumericText>
+      </View>
+      <Pressable
+        accessibilityLabel={deleteAccessibilityLabel}
+        accessibilityRole="button"
+        className="ml-3 min-h-11 rounded-xl px-3 py-2 active:opacity-80"
+        hitSlop={4}
+        onPress={() => {
+          onDelete(item.symbol);
+        }}
+        style={{ borderCurve: 'continuous' }}>
+        <Text className="text-sm font-medium text-secondary">{deleteLabel}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+});
+
 export default function MarketScreen() {
   const { t } = useTranslation();
-  const [rows, setRows] = useState<MarketRow[]>([]);
+  const [rows, setRows] = useState<MarketRowData[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const accentColor = '#5E6AD2';
+  const reducedMotion = useReducedMotion();
   const searchQuery = useMarketSearchQuery();
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const normalizedSearchQuery = deferredSearchQuery.trim().toLowerCase();
@@ -58,7 +124,7 @@ export default function MarketScreen() {
     if (symbols.length === 0) {
       return {
         error: null as string | null,
-        rows: [] as MarketRow[],
+        rows: [] as MarketRowData[],
       };
     }
 
@@ -124,24 +190,19 @@ export default function MarketScreen() {
     }
   }
 
-  async function handleDeleteSymbol(symbol: string) {
+  const handleDeleteSymbol = useCallback(async (symbol: string) => {
     try {
       await removeFromWatchlist(symbol);
       const nextMarket = await fetchMarket();
       setRows(nextMarket.rows);
       setError(nextMarket.error);
+      if (process.env.EXPO_OS === 'ios') {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : t('market.errors.delete'));
     }
-  }
-
-  function getChangeText(changePct: number | null) {
-    if (changePct === null) {
-      return '--';
-    }
-
-    return `${changePct > 0 ? '+' : ''}${changePct.toFixed(2)}%`;
-  }
+  }, [fetchMarket, t]);
 
   const filteredRows =
     normalizedSearchQuery.length === 0
@@ -153,40 +214,22 @@ export default function MarketScreen() {
           );
         });
 
-  function renderItem({ index, item }: ListRenderItemInfo<MarketRow>) {
-    return (
-      <Animated.View
-        entering={FadeIn.duration(220).delay(Math.min(index * 40, 200))}
-        layout={LinearTransition.duration(220)}
-        className={`flex-row items-center gap-3 py-4 ${
-          index === 0 ? '' : 'border-t border-divider'
-        }`}>
-        <View className="flex-1 gap-1">
-          <Text className="text-base font-semibold text-primary">{item.name}</Text>
-          <Text className="text-sm text-secondary" selectable>
-            {item.symbol}
-          </Text>
-        </View>
-        <View className="items-end gap-1">
-          <NumericText className="text-lg font-semibold text-primary">
-            {item.price === null ? '--' : item.price.toFixed(2)}
-          </NumericText>
-          <NumericText className="text-sm font-medium" toneValue={item.changePct}>
-            {getChangeText(item.changePct)}
-          </NumericText>
-        </View>
-        <Pressable
-          className="ml-3 min-h-11 rounded-xl px-3 py-2 active:opacity-80"
-          hitSlop={4}
-          onPress={() => {
-            void handleDeleteSymbol(item.symbol);
-          }}
-          style={{ borderCurve: 'continuous' }}>
-          <Text className="text-sm font-medium text-secondary">{t('market.delete')}</Text>
-        </Pressable>
-      </Animated.View>
-    );
-  }
+  const renderItem = useCallback(
+    ({ index, item }: ListRenderItemInfo<MarketRowData>) => (
+      <MarketListRow
+        deleteAccessibilityLabel={t('accessibility.market.deleteSymbol', {
+          name: item.name,
+          symbol: item.symbol,
+        })}
+        deleteLabel={t('market.delete')}
+        index={index}
+        item={item}
+        onDelete={handleDeleteSymbol}
+        reducedMotion={reducedMotion}
+      />
+    ),
+    [handleDeleteSymbol, reducedMotion, t]
+  );
 
   if (loading) {
     return (
@@ -219,14 +262,14 @@ export default function MarketScreen() {
       }
       ListHeaderComponent={
         <View className="pb-6">
-          <Animated.View entering={FadeIn.duration(220)}>
+          <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
             <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
           </Animated.View>
           {error ? (
             <Animated.Text
               className="pt-4 text-sm text-error"
-              entering={FadeIn.duration(200)}
-              exiting={FadeOut.duration(160)}
+              entering={reducedMotion ? undefined : FadeIn.duration(200)}
+              exiting={reducedMotion ? undefined : FadeOut.duration(160)}
               selectable>
               {error}
             </Animated.Text>

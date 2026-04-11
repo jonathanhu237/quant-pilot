@@ -5,6 +5,31 @@
       "chinese": "中"
     }
   },
+  "accessibility": {
+    "home": {
+      "switchToEnglish": "切换语言为英文",
+      "switchToChinese": "切换语言为简体中文",
+      "switchToLightTheme": "切换到浅色主题",
+      "switchToDarkTheme": "切换到深色主题",
+      "openPaperTrading": "打开模拟交易"
+    },
+    "market": {
+      "addSymbol": "添加股票到自选股",
+      "deleteSymbol": "从自选股删除 {{name}} {{symbol}}",
+      "cancelAddSymbol": "取消添加股票",
+      "confirmAddSymbol": "添加股票到自选股"
+    },
+    "paperTrading": {
+      "openTradeSheet": "打开交易面板",
+      "cancelTrade": "取消交易",
+      "submitBuyTrade": "提交买入交易",
+      "submitSellTrade": "提交卖出交易"
+    },
+    "strategy": {
+      "selectStrategy": "选择 {{name}} 策略",
+      "runBacktest": "运行回测"
+    }
+  },
   "tabs": {
     "home": "首页",
     "market": "行情",

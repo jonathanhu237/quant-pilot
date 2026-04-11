@@ -29,6 +29,9 @@ export function PillSelector<T extends string>({
 
         return (
           <Pressable
+            accessibilityLabel={option.label}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
             key={option.value}
             className={`min-h-11 rounded-full px-4 py-2 active:opacity-80 ${
               selected ? 'bg-accent' : 'bg-background'

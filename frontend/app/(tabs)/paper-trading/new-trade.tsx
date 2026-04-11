@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { PillSelector } from '@/components/pill-selector';
 import { buyStock, sellStock } from '@/lib/api';
@@ -29,6 +30,23 @@ export default function NewTradeSheet() {
   const [symbol, setSymbol] = useState('');
   const [shares, setShares] = useState('');
   const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
+  const reducedMotion = useReducedMotion();
+  const submitAccessibilityLabel =
+    tradeSide === 'buy'
+      ? t('accessibility.paperTrading.submitBuyTrade')
+      : t('accessibility.paperTrading.submitSellTrade');
+
+  async function triggerSuccessHaptic() {
+    if (process.env.EXPO_OS === 'ios') {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  }
+
+  async function triggerErrorHaptic() {
+    if (process.env.EXPO_OS === 'ios') {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  }
 
   async function submitTrade() {
     const normalizedSymbol = symbol.trim();
@@ -54,10 +72,13 @@ export default function NewTradeSheet() {
         await sellStock({ shares: parsedShares, symbol: normalizedSymbol });
       }
 
+      await triggerSuccessHaptic();
       router.back();
     } catch (tradeError) {
       const errorCode =
         tradeError instanceof Error ? (tradeError as TradeApiError).code : undefined;
+
+      await triggerErrorHaptic();
 
       if (isTradeErrorCode(errorCode)) {
         setSheetError(t(`paperTrading.errors.${errorCode}`));
@@ -121,8 +142,8 @@ export default function NewTradeSheet() {
         {sheetError ? (
           <Animated.Text
             className="text-sm text-error"
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(160)}
+            entering={reducedMotion ? undefined : FadeIn.duration(200)}
+            exiting={reducedMotion ? undefined : FadeOut.duration(160)}
             selectable>
             {sheetError}
           </Animated.Text>
@@ -131,12 +152,16 @@ export default function NewTradeSheet() {
 
       <View className="flex-row gap-3 border-t border-divider px-5 pb-8 pt-4">
         <Pressable
+          accessibilityLabel={t('accessibility.paperTrading.cancelTrade')}
+          accessibilityRole="button"
           className="min-h-11 flex-1 items-center justify-center rounded-xl border border-divider px-4 py-3 active:opacity-80"
           onPress={() => router.back()}
           style={{ borderCurve: 'continuous' }}>
           <Text className="font-medium text-secondary">{t('paperTrading.tradeModal.cancel')}</Text>
         </Pressable>
         <Pressable
+          accessibilityLabel={submitAccessibilityLabel}
+          accessibilityRole="button"
           className={`min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-3 ${
             submitting ? 'bg-accent/70' : 'bg-accent active:opacity-80'
           }`}

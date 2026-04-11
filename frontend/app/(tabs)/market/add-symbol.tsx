@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { addToWatchlist } from '@/lib/api';
 
@@ -14,6 +15,13 @@ export default function AddSymbolSheet() {
   const [sheetError, setSheetError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
+  const reducedMotion = useReducedMotion();
+
+  async function triggerSuccessHaptic() {
+    if (process.env.EXPO_OS === 'ios') {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  }
 
   async function handleAddSymbol() {
     const symbol = newSymbol.trim();
@@ -28,6 +36,7 @@ export default function AddSymbolSheet() {
 
     try {
       await addToWatchlist(symbol);
+      await triggerSuccessHaptic();
       router.back();
     } catch (submitError) {
       setSheetError(submitError instanceof Error ? submitError.message : t('market.errors.add'));
@@ -58,8 +67,8 @@ export default function AddSymbolSheet() {
         {sheetError ? (
           <Animated.Text
             className="mt-4 text-sm text-error"
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(160)}
+            entering={reducedMotion ? undefined : FadeIn.duration(200)}
+            exiting={reducedMotion ? undefined : FadeOut.duration(160)}
             selectable>
             {sheetError}
           </Animated.Text>
@@ -68,12 +77,16 @@ export default function AddSymbolSheet() {
 
       <View className="flex-row gap-3 border-t border-divider px-5 pb-8 pt-4">
         <Pressable
+          accessibilityLabel={t('accessibility.market.cancelAddSymbol')}
+          accessibilityRole="button"
           className="min-h-11 flex-1 items-center justify-center rounded-xl border border-divider px-4 py-3 active:opacity-80"
           onPress={() => router.back()}
           style={{ borderCurve: 'continuous' }}>
           <Text className="font-medium text-secondary">{t('market.cancel')}</Text>
         </Pressable>
         <Pressable
+          accessibilityLabel={t('accessibility.market.confirmAddSymbol')}
+          accessibilityRole="button"
           className={`min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-3 ${
             submitting ? 'bg-accent/70' : 'bg-accent active:opacity-80'
           }`}
