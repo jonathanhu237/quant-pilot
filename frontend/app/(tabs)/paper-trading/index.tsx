@@ -114,12 +114,11 @@ export default function PaperTradingScreen() {
   return (
     <ScrollView
       className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ gap: 24, paddingBottom: 40, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
       }>
-      <View className="gap-6 px-5 pb-8 pt-2">
         <Animated.View entering={FadeIn.duration(220)}>
           <Text className="text-sm leading-6 text-secondary">{t('paperTrading.subtitle')}</Text>
         </Animated.View>
@@ -294,7 +293,6 @@ export default function PaperTradingScreen() {
             ))
           )}
         </SectionCard>
-      </View>
     </ScrollView>
   );
 }

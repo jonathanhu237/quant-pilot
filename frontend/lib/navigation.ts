@@ -11,10 +11,10 @@ export function getThemedStackOptions(isDark: boolean) {
   const textColor = getTextColor(isDark);
 
   return {
+    headerBackButtonDisplayMode: 'minimal' as const,
     contentStyle: {
       backgroundColor,
     },
-    headerBackTitleVisible: false,
     headerLargeStyle: {
       backgroundColor,
     },

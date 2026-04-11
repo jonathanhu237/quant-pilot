@@ -40,6 +40,7 @@
     "loading": "正在加载行情数据...",
     "emptyTitle": "还没有自选股",
     "emptySubtitle": "添加一个 6 位 A 股代码开始追踪行情。",
+    "searchPlaceholder": "搜索股票...",
     "invalidSymbol": "请输入有效的 6 位 A 股代码。",
     "modalTitle": "添加 A 股代码",
     "symbolPlaceholder": "600519",

@@ -71,7 +71,7 @@ export default function NewTradeSheet() {
 
   return (
     <View className="flex-1 bg-surface">
-      <View className="flex-1 px-5 pt-4">
+      <View className="flex-1 gap-5 px-5 pt-4">
         <PillSelector
           onChange={setTradeSide}
           options={[
@@ -81,12 +81,12 @@ export default function NewTradeSheet() {
           selectedValue={tradeSide}
         />
 
-        <View className="mt-5">
+        <View className="gap-2">
           <Text className="text-sm font-medium text-secondary">
             {t('paperTrading.tradeModal.symbol')}
           </Text>
           <TextInput
-            className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+            className="rounded-2xl border border-divider bg-background px-4 text-primary"
             keyboardType="number-pad"
             maxLength={6}
             onChangeText={(value) => {
@@ -100,12 +100,12 @@ export default function NewTradeSheet() {
           />
         </View>
 
-        <View className="mt-5">
+        <View className="gap-2">
           <Text className="text-sm font-medium text-secondary">
             {t('paperTrading.tradeModal.shares')}
           </Text>
           <TextInput
-            className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+            className="rounded-2xl border border-divider bg-background px-4 text-primary"
             keyboardType="number-pad"
             onChangeText={(value) => {
               setShares(value);
@@ -120,7 +120,7 @@ export default function NewTradeSheet() {
 
         {sheetError ? (
           <Animated.Text
-            className="mt-4 text-sm text-error"
+            className="text-sm text-error"
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(160)}
             selectable>

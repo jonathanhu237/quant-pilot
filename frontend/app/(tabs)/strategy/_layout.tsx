@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
+import { Stack } from 'expo-router/stack';
 
 import { getThemedStackOptions } from '@/lib/navigation';
 
@@ -11,7 +11,10 @@ export default function StrategyStackLayout() {
 
   return (
     <Stack screenOptions={getThemedStackOptions(isDark)}>
-      <Stack.Screen name="index" options={{ title: t('strategy.title') }} />
+      <Stack.Screen
+        name="index"
+        options={{ headerLargeTitle: true, title: t('strategy.title') }}
+      />
     </Stack>
   );
 }

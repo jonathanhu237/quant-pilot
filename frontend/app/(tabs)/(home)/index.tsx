@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -48,20 +48,20 @@ function TradeRow({
       className={`flex-row items-start justify-between px-4 py-4 ${
         index === 0 ? '' : 'border-t border-divider'
       }`}>
-      <View className="flex-1 pr-4">
+      <View className="flex-1 gap-1 pr-4">
         <Text className="text-base font-semibold text-accent">
           {t(`paperTrading.tradeSide.${trade.side}`)}
         </Text>
-        <NumericText className="mt-1 text-sm text-secondary">
+        <NumericText className="text-sm text-secondary">
           {trade.symbol} · {trade.shares}
           {t('paperTrading.sharesUnit')}
         </NumericText>
       </View>
-      <View className="items-end">
+      <View className="items-end gap-1">
         <NumericText className="text-base font-semibold text-primary">
           {formatCurrency(trade.price)}
         </NumericText>
-        <Text className="mt-1 text-xs text-secondary" selectable>
+        <Text className="text-xs text-secondary" selectable>
           {new Date(trade.created_at).toLocaleString()}
         </Text>
       </View>
@@ -77,19 +77,17 @@ function QuoteRow({ index, quote }: { index: number; quote: DashboardWatchlistQu
       className={`flex-row items-center justify-between px-4 py-4 ${
         index === 0 ? '' : 'border-t border-divider'
       }`}>
-      <View className="flex-1 pr-4">
+      <View className="flex-1 gap-1 pr-4">
         <Text className="text-base font-semibold text-primary">{quote.name}</Text>
-        <Text className="mt-1 text-sm text-secondary" selectable>
+        <Text className="text-sm text-secondary" selectable>
           {quote.symbol}
         </Text>
       </View>
-      <View className="items-end">
+      <View className="items-end gap-1">
         <NumericText className="text-base font-semibold text-primary">
           {quote.price.toFixed(2)}
         </NumericText>
-        <NumericText
-          className="mt-1 text-sm font-medium"
-          toneValue={quote.change_pct}>
+        <NumericText className="text-sm font-medium" toneValue={quote.change_pct}>
           {quote.change_pct > 0 ? '+' : ''}
           {quote.change_pct.toFixed(2)}%
         </NumericText>
@@ -139,9 +137,9 @@ export default function HomeScreen() {
 
   if (loading || dashboard === null) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View className="flex-1 items-center justify-center gap-3 bg-background">
         <ActivityIndicator color={accentColor} />
-        <Text className="mt-3 text-base text-secondary">{t('home.loading')}</Text>
+        <Text className="text-base text-secondary">{t('home.loading')}</Text>
       </View>
     );
   }
@@ -149,35 +147,34 @@ export default function HomeScreen() {
   return (
     <ScrollView
       className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: 32 }}
+      contentContainerStyle={{ gap: 24, paddingBottom: 32, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={accentColor} />
       }>
-      <View className="gap-6 px-5 pb-8 pt-2">
-        <Animated.View entering={FadeIn.duration(220)}>
-          <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>
-        </Animated.View>
+      <Animated.View entering={FadeIn.duration(220)}>
+        <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>
+      </Animated.View>
 
-        {error ? (
-          <Animated.Text
-            className="text-sm text-error"
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(160)}
-            selectable>
-            {error}
-          </Animated.Text>
-        ) : null}
+      {error ? (
+        <Animated.Text
+          className="text-sm text-error"
+          entering={FadeIn.duration(200)}
+          exiting={FadeOut.duration(160)}
+          selectable>
+          {error}
+        </Animated.Text>
+      ) : null}
 
-        <Animated.View entering={FadeIn.duration(240).delay(40)}>
+      <Animated.View entering={FadeIn.duration(240).delay(40)}>
+        <Link href="/paper-trading" asChild>
           <Pressable
-            className="rounded-3xl bg-surface px-4 py-5 active:opacity-80"
-            onPress={() => router.push('/paper-trading')}
+            className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
             style={{ borderCurve: 'continuous' }}>
             <View className="flex-row items-start justify-between gap-4">
-              <View className="flex-1">
+              <View className="flex-1 gap-2">
                 <Text className="text-sm text-secondary">{t('home.account.title')}</Text>
-                <NumericText className="mt-2 text-3xl font-bold text-primary">
+                <NumericText className="text-3xl font-bold text-primary">
                   {formatCurrency(dashboard.account_summary.total_assets)}
                 </NumericText>
               </View>
@@ -187,44 +184,44 @@ export default function HomeScreen() {
                 {formatPercent(dashboard.account_summary.total_return_rate)}
               </NumericText>
             </View>
-            <Text className="mt-4 text-sm font-medium text-accent">{t('home.account.cta')}</Text>
+            <Text className="text-sm font-medium text-accent">{t('home.account.cta')}</Text>
           </Pressable>
-        </Animated.View>
+        </Link>
+      </Animated.View>
 
-        <Animated.View entering={FadeIn.duration(240).delay(80)}>
-          <SectionCard
-            subtitle={t('home.recentTrades.subtitle')}
-            title={t('home.recentTrades.title')}>
-            {dashboard.recent_trades.length === 0 ? (
-              <View className="px-4 py-8">
-                <Text className="text-center text-base text-secondary">
-                  {t('home.recentTrades.empty')}
-                </Text>
-              </View>
-            ) : (
-              dashboard.recent_trades.map((trade, index) => (
-                <TradeRow key={trade.id} index={index} t={t} trade={trade} />
-              ))
-            )}
-          </SectionCard>
-        </Animated.View>
+      <Animated.View entering={FadeIn.duration(240).delay(80)}>
+        <SectionCard
+          subtitle={t('home.recentTrades.subtitle')}
+          title={t('home.recentTrades.title')}>
+          {dashboard.recent_trades.length === 0 ? (
+            <View className="px-4 py-8">
+              <Text className="text-center text-base text-secondary">
+                {t('home.recentTrades.empty')}
+              </Text>
+            </View>
+          ) : (
+            dashboard.recent_trades.map((trade, index) => (
+              <TradeRow key={trade.id} index={index} t={t} trade={trade} />
+            ))
+          )}
+        </SectionCard>
+      </Animated.View>
 
-        <Animated.View entering={FadeIn.duration(240).delay(120)}>
-          <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
-            {dashboard.watchlist_quotes.length === 0 ? (
-              <View className="px-4 py-8">
-                <Text className="text-center text-base text-secondary">
-                  {t('home.watchlist.empty')}
-                </Text>
-              </View>
-            ) : (
-              dashboard.watchlist_quotes.map((quote, index) => (
-                <QuoteRow key={quote.symbol} index={index} quote={quote} />
-              ))
-            )}
-          </SectionCard>
-        </Animated.View>
-      </View>
+      <Animated.View entering={FadeIn.duration(240).delay(120)}>
+        <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
+          {dashboard.watchlist_quotes.length === 0 ? (
+            <View className="px-4 py-8">
+              <Text className="text-center text-base text-secondary">
+                {t('home.watchlist.empty')}
+              </Text>
+            </View>
+          ) : (
+            dashboard.watchlist_quotes.map((quote, index) => (
+              <QuoteRow key={quote.symbol} index={index} quote={quote} />
+            ))
+          )}
+        </SectionCard>
+      </Animated.View>
     </ScrollView>
   );
 }

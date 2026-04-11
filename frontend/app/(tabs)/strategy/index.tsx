@@ -208,9 +208,8 @@ export default function StrategyScreen() {
   return (
     <ScrollView
       className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: 32 }}
+      contentContainerStyle={{ gap: 24, paddingBottom: 32, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic">
-      <View className="gap-6 px-5 pb-8 pt-2">
         <Animated.View entering={FadeIn.duration(220)}>
           <Text className="text-sm leading-6 text-secondary">{t('strategy.subtitle')}</Text>
         </Animated.View>
@@ -393,7 +392,6 @@ export default function StrategyScreen() {
             </SectionCard>
           </Animated.View>
         ) : null}
-      </View>
     </ScrollView>
   );
 }

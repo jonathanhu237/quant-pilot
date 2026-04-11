@@ -1,9 +1,11 @@
-import { Stack, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { Pressable } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
+import { Stack } from 'expo-router/stack';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { setMarketSearchQuery } from '@/lib/market-search';
 import { getThemedSheetOptions, getThemedStackOptions } from '@/lib/navigation';
 
 export default function MarketStackLayout() {
@@ -16,15 +18,27 @@ export default function MarketStackLayout() {
       <Stack.Screen
         name="index"
         options={{
+          headerLargeTitle: true,
           headerRight: () => (
-            <Pressable
-              className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
-              hitSlop={4}
-              onPress={() => router.push('./add-symbol')}
-              style={{ borderCurve: 'continuous' }}>
-              <IconSymbol color="#FFFFFF" name="plus" size={18} />
-            </Pressable>
+            <Link href="./add-symbol" asChild>
+              <Pressable
+                className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
+                hitSlop={4}
+                style={{ borderCurve: 'continuous' }}>
+                <IconSymbol color="#FFFFFF" name="plus" size={18} />
+              </Pressable>
+            </Link>
           ),
+          headerSearchBarOptions: {
+            autoCapitalize: 'none',
+            onCancelButtonPress: () => {
+              setMarketSearchQuery('');
+            },
+            onChangeText: (event) => {
+              setMarketSearchQuery(event.nativeEvent.text);
+            },
+            placeholder: t('market.searchPlaceholder'),
+          },
           title: t('market.title'),
         }}
       />

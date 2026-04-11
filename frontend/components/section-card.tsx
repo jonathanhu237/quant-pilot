@@ -22,11 +22,9 @@ export function SectionCard({
       className={`rounded-3xl bg-surface ${className ?? ''}`}
       style={[{ borderCurve: 'continuous' }, style]}>
       {title || subtitle ? (
-        <View className="px-4 pt-5">
+        <View className="gap-2 px-4 pt-5">
           {title ? <Text className="text-xl font-semibold text-primary">{title}</Text> : null}
-          {subtitle ? (
-            <Text className="mt-2 text-sm leading-6 text-secondary">{subtitle}</Text>
-          ) : null}
+          {subtitle ? <Text className="text-sm leading-6 text-secondary">{subtitle}</Text> : null}
         </View>
       ) : null}
       <View className={bodyClassName}>{children}</View>

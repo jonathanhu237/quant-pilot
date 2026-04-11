@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useDeferredValue, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
 import { getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
+import { setMarketSearchQuery, useMarketSearchQuery } from '@/lib/market-search';
 
 type MarketRow = {
   changePct: number | null;
@@ -47,6 +48,9 @@ export default function MarketScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const accentColor = '#5E6AD2';
+  const searchQuery = useMarketSearchQuery();
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const normalizedSearchQuery = deferredSearchQuery.trim().toLowerCase();
 
   const fetchMarket = useCallback(async () => {
     const symbols = await getWatchlist();
@@ -75,6 +79,7 @@ export default function MarketScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setMarketSearchQuery('');
 
       async function initialize() {
         try {
@@ -138,6 +143,16 @@ export default function MarketScreen() {
     return `${changePct > 0 ? '+' : ''}${changePct.toFixed(2)}%`;
   }
 
+  const filteredRows =
+    normalizedSearchQuery.length === 0
+      ? rows
+      : rows.filter((item) => {
+          const query = normalizedSearchQuery;
+          return (
+            item.symbol.toLowerCase().includes(query) || item.name.toLowerCase().includes(query)
+          );
+        });
+
   function renderItem({ index, item }: ListRenderItemInfo<MarketRow>) {
     return (
       <Animated.View
@@ -146,17 +161,17 @@ export default function MarketScreen() {
         className={`flex-row items-center gap-3 py-4 ${
           index === 0 ? '' : 'border-t border-divider'
         }`}>
-        <View className="flex-1">
+        <View className="flex-1 gap-1">
           <Text className="text-base font-semibold text-primary">{item.name}</Text>
-          <Text className="mt-1 text-sm text-secondary" selectable>
+          <Text className="text-sm text-secondary" selectable>
             {item.symbol}
           </Text>
         </View>
-        <View className="items-end">
+        <View className="items-end gap-1">
           <NumericText className="text-lg font-semibold text-primary">
             {item.price === null ? '--' : item.price.toFixed(2)}
           </NumericText>
-          <NumericText className="mt-1 text-sm font-medium" toneValue={item.changePct}>
+          <NumericText className="text-sm font-medium" toneValue={item.changePct}>
             {getChangeText(item.changePct)}
           </NumericText>
         </View>
@@ -175,9 +190,9 @@ export default function MarketScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View className="flex-1 items-center justify-center gap-3 bg-background">
         <ActivityIndicator color={accentColor} />
-        <Text className="mt-3 text-base text-secondary">{t('market.loading')}</Text>
+        <Text className="text-base text-secondary">{t('market.loading')}</Text>
       </View>
     );
   }
@@ -192,12 +207,12 @@ export default function MarketScreen() {
         paddingTop: 8,
       }}
       contentInsetAdjustmentBehavior="automatic"
-      data={rows}
+      data={filteredRows}
       keyExtractor={(item) => item.symbol}
       ListEmptyComponent={
-        <View className="flex-1 items-center justify-center px-6">
+        <View className="flex-1 items-center justify-center gap-2 px-6">
           <Text className="text-xl font-semibold text-primary">{t('market.emptyTitle')}</Text>
-          <Text className="mt-2 text-center text-sm leading-6 text-secondary">
+          <Text className="text-center text-sm leading-6 text-secondary">
             {t('market.emptySubtitle')}
           </Text>
         </View>

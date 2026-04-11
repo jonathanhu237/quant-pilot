@@ -38,10 +38,10 @@ export default function AddSymbolSheet() {
 
   return (
     <View className="flex-1 bg-surface">
-      <View className="flex-1 px-5 pt-4">
+      <View className="flex-1 gap-5 px-5 pt-4">
         <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
         <TextInput
-          className="mt-5 rounded-2xl border border-divider bg-background px-4 text-primary"
+          className="rounded-2xl border border-divider bg-background px-4 text-primary"
           keyboardType="number-pad"
           maxLength={6}
           onChangeText={(value) => {

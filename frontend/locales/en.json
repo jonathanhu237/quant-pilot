@@ -40,6 +40,7 @@
     "loading": "Loading market data...",
     "emptyTitle": "No symbols yet",
     "emptySubtitle": "Add a 6-digit A-share code to start tracking quotes.",
+    "searchPlaceholder": "Search symbols...",
     "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
     "modalTitle": "Add A-share Symbol",
     "symbolPlaceholder": "600519",
