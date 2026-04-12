@@ -11,7 +11,8 @@
       "switchToChinese": "Switch language to Simplified Chinese",
       "switchToLightTheme": "Switch to light theme",
       "switchToDarkTheme": "Switch to dark theme",
-      "openPaperTrading": "Open paper trading"
+      "openPaperTrading": "Open paper trading",
+      "tradeFromSignal": "Trade {{symbol}} based on {{strategy}} {{side}} signal"
     },
     "market": {
       "addSymbol": "Add symbol to watchlist",
@@ -59,6 +60,13 @@
       "empty": "Add stocks to your watchlist to see strategy signals.",
       "errors": {
         "load": "Failed to load strategy signals."
+      },
+      "tradeSheet": {
+        "title": "Trade from Signal",
+        "contextLabel": "Triggered by",
+        "signalDateLabel": "Signal date",
+        "priceLabel": "Current price",
+        "symbolLabel": "Symbol"
       },
       "buy": "Buy",
       "sell": "Sell",

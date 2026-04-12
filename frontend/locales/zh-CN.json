@@ -11,7 +11,8 @@
       "switchToChinese": "切换语言为简体中文",
       "switchToLightTheme": "切换到浅色主题",
       "switchToDarkTheme": "切换到深色主题",
-      "openPaperTrading": "打开模拟交易"
+      "openPaperTrading": "打开模拟交易",
+      "tradeFromSignal": "根据 {{strategy}} 的 {{side}} 信号交易 {{symbol}}"
     },
     "market": {
       "addSymbol": "添加股票到自选股",
@@ -59,6 +60,13 @@
       "empty": "添加自选股以查看策略信号。",
       "errors": {
         "load": "加载策略信号失败。"
+      },
+      "tradeSheet": {
+        "title": "信号交易",
+        "contextLabel": "触发策略",
+        "signalDateLabel": "信号日期",
+        "priceLabel": "当前价",
+        "symbolLabel": "股票代码"
       },
       "buy": "买入",
       "sell": "卖出",

@@ -1,5 +1,6 @@
 import { Link } from 'expo-router';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   RefreshControl,
@@ -158,15 +159,51 @@ const SignalRow = memo(function SignalRow({
             const strategyName = t(`strategy.strategies.${signal.strategy_id}.name`, {
               defaultValue: signal.strategy_name,
             });
+            const signalLabel = t(`home.signals.${signal.signal}`);
+            const tradeAccessibilityLabel = t('accessibility.home.tradeFromSignal', {
+              side: signalLabel,
+              strategy: strategyName,
+              symbol: symbolSignal.symbol,
+            });
+
+            if (signal.signal === 'hold') {
+              return (
+                <View
+                  key={`${symbolSignal.symbol}-${signal.strategy_id}`}
+                  className={`rounded-full border px-2 py-1 ${getSignalToneClasses(signal.signal)}`}>
+                  <Text className="text-[11px] font-medium leading-4">
+                    {strategyName} · {signalLabel}
+                  </Text>
+                </View>
+              );
+            }
 
             return (
-              <View
+              <Link
+                href={{
+                  params: {
+                    price: symbolSignal.price.toString(),
+                    side: signal.signal,
+                    signalDate: signal.signal_date,
+                    strategyId: signal.strategy_id,
+                    strategyName,
+                    symbol: symbolSignal.symbol,
+                  },
+                  pathname: './new-trade',
+                }}
                 key={`${symbolSignal.symbol}-${signal.strategy_id}`}
-                className={`rounded-full border px-2 py-1 ${getSignalToneClasses(signal.signal)}`}>
-                <Text className="text-[11px] font-medium leading-4">
-                  {strategyName} · {t(`home.signals.${signal.signal}`)}
-                </Text>
-              </View>
+                asChild>
+                <Pressable
+                  accessibilityLabel={tradeAccessibilityLabel}
+                  accessibilityRole="button"
+                  className={`rounded-full border px-2 py-1 active:opacity-80 ${getSignalToneClasses(signal.signal)}`}
+                  hitSlop={4}
+                  style={{ borderCurve: 'continuous' }}>
+                  <Text className="text-[11px] font-medium leading-4">
+                    {strategyName} · {signalLabel}
+                  </Text>
+                </Pressable>
+              </Link>
             );
           })}
         </View>
@@ -185,6 +222,7 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [signalsError, setSignalsError] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
+  const hasFocusedOnceRef = useRef(false);
 
   const loadDashboard = useCallback(async () => {
     setError(null);
@@ -227,6 +265,56 @@ export default function HomeScreen() {
 
     void initializeSignals();
   }, [loadSignals, t]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedOnceRef.current) {
+        hasFocusedOnceRef.current = true;
+        return undefined;
+      }
+
+      let active = true;
+
+      async function refreshOnFocus() {
+        const [dashboardResult, signalsResult] = await Promise.allSettled([
+          getDashboard(),
+          getWatchlistSignals(),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        if (dashboardResult.status === 'fulfilled') {
+          setDashboard(dashboardResult.value);
+          setError(null);
+        } else {
+          setError(
+            dashboardResult.reason instanceof Error
+              ? dashboardResult.reason.message
+              : t('home.errors.refresh')
+          );
+        }
+
+        if (signalsResult.status === 'fulfilled') {
+          setSignals(signalsResult.value);
+          setSignalsError(null);
+        } else {
+          setSignalsError(
+            signalsResult.reason instanceof Error
+              ? signalsResult.reason.message
+              : t('home.signals.errors.load')
+          );
+        }
+      }
+
+      void refreshOnFocus();
+
+      return () => {
+        active = false;
+      };
+    }, [t])
+  );
 
   async function refresh() {
     setRefreshing(true);

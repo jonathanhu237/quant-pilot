@@ -1,94 +1,31 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { PillSelector } from '@/components/pill-selector';
-import { buyStock, sellStock } from '@/lib/api';
-
-type TradeSide = 'buy' | 'sell';
-type TradeErrorCode = 'insufficient_cash' | 'insufficient_position' | 'quote_unavailable';
-type TradeApiError = Error & { code?: string };
-
-function isTradeErrorCode(code: string | undefined): code is TradeErrorCode {
-  return (
-    code === 'insufficient_cash' ||
-    code === 'insufficient_position' ||
-    code === 'quote_unavailable'
-  );
-}
+import { TradeSide, useTradeSubmission } from '@/hooks/use-trade-submission';
 
 export default function NewTradeSheet() {
   const { t } = useTranslation();
   const { colorScheme } = useColorScheme();
-  const [submitting, setSubmitting] = useState(false);
-  const [sheetError, setSheetError] = useState<string | null>(null);
   const [tradeSide, setTradeSide] = useState<TradeSide>('buy');
   const [symbol, setSymbol] = useState('');
   const [shares, setShares] = useState('');
   const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
   const reducedMotion = useReducedMotion();
+  const { sheetError, setSheetError, submitTrade, submitting } = useTradeSubmission({
+    onSuccess: () => router.back(),
+    shares,
+    side: tradeSide,
+    symbol,
+  });
   const submitAccessibilityLabel =
     tradeSide === 'buy'
       ? t('accessibility.paperTrading.submitBuyTrade')
       : t('accessibility.paperTrading.submitSellTrade');
-
-  async function triggerSuccessHaptic() {
-    if (process.env.EXPO_OS === 'ios') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  }
-
-  async function triggerErrorHaptic() {
-    if (process.env.EXPO_OS === 'ios') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  }
-
-  async function submitTrade() {
-    const normalizedSymbol = symbol.trim();
-    const parsedShares = Number.parseInt(shares.trim(), 10);
-
-    if (!/^\d{6}$/.test(normalizedSymbol)) {
-      setSheetError(t('paperTrading.errors.invalidSymbol'));
-      return;
-    }
-
-    if (!Number.isFinite(parsedShares) || parsedShares <= 0) {
-      setSheetError(t('paperTrading.errors.invalidShares'));
-      return;
-    }
-
-    setSubmitting(true);
-    setSheetError(null);
-
-    try {
-      if (tradeSide === 'buy') {
-        await buyStock({ shares: parsedShares, symbol: normalizedSymbol });
-      } else {
-        await sellStock({ shares: parsedShares, symbol: normalizedSymbol });
-      }
-
-      await triggerSuccessHaptic();
-      router.back();
-    } catch (tradeError) {
-      const errorCode =
-        tradeError instanceof Error ? (tradeError as TradeApiError).code : undefined;
-
-      await triggerErrorHaptic();
-
-      if (isTradeErrorCode(errorCode)) {
-        setSheetError(t(`paperTrading.errors.${errorCode}`));
-      } else {
-        setSheetError(t('paperTrading.errors.trade'));
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  }
 
   return (
     <View className="flex-1 bg-surface">

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import i18n, { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
-import { getThemedStackOptions } from '@/lib/navigation';
+import { getThemedSheetOptions, getThemedStackOptions } from '@/lib/navigation';
 import { setPreference, THEME_STORAGE_KEY } from '@/lib/preferences';
 
 export default function HomeStackLayout() {
@@ -73,6 +73,10 @@ export default function HomeStackLayout() {
           ),
           title: t('home.title'),
         }}
+      />
+      <Stack.Screen
+        name="new-trade"
+        options={getThemedSheetOptions(isDark, t('home.signals.tradeSheet.title'))}
       />
     </Stack>
   );
