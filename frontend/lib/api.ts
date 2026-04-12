@@ -101,6 +101,21 @@ export type DashboardResponse = {
   watchlist_quotes: DashboardWatchlistQuote[];
 };
 
+export type StrategySignalSnapshot = {
+  strategy_id: string;
+  strategy_name: string;
+  signal: 'buy' | 'sell' | 'hold';
+  signal_date: string;
+};
+
+export type SymbolSignalSnapshot = {
+  symbol: string;
+  name: string;
+  price: number;
+  change_pct: number;
+  signals: StrategySignalSnapshot[];
+};
+
 type WatchlistItem = {
   symbol: string;
 };
@@ -235,4 +250,8 @@ export async function getTradeHistory(): Promise<TradingTrade[]> {
 
 export async function getDashboard(): Promise<DashboardResponse> {
   return request<DashboardResponse>('/api/dashboard');
+}
+
+export async function getWatchlistSignals(): Promise<SymbolSignalSnapshot[]> {
+  return request<SymbolSignalSnapshot[]>('/api/signals/watchlist');
 }

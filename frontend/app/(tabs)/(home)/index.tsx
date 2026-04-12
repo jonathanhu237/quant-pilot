@@ -20,9 +20,11 @@ import { SectionCard } from '@/components/section-card';
 import { SkeletonBlock } from '@/components/skeleton-block';
 import {
   getDashboard,
+  getWatchlistSignals,
   type DashboardResponse,
   type DashboardTrade,
   type DashboardWatchlistQuote,
+  type SymbolSignalSnapshot,
 } from '@/lib/api';
 
 function formatCurrency(value: number) {
@@ -111,18 +113,89 @@ const QuoteRow = memo(function QuoteRow({
   );
 });
 
+const SignalRow = memo(function SignalRow({
+  index,
+  reducedMotion,
+  symbolSignal,
+  t,
+}: {
+  index: number;
+  reducedMotion: boolean;
+  symbolSignal: SymbolSignalSnapshot;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) {
+  function getSignalToneClasses(signal: 'buy' | 'sell' | 'hold') {
+    return signal === 'buy'
+      ? 'border-up/30 bg-up/10 text-up'
+      : signal === 'sell'
+        ? 'border-down/30 bg-down/10 text-down'
+        : 'border-divider bg-background/60 text-secondary';
+  }
+
+  return (
+    <Animated.View
+      entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 180))}
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
+      className={`flex-row items-start justify-between px-4 py-4 ${
+        index === 0 ? '' : 'border-t border-divider'
+      }`}>
+      <View className="flex-1 gap-1 pr-4">
+        <Text className="text-base font-semibold text-primary">{symbolSignal.name}</Text>
+        <Text className="text-sm text-secondary" selectable>
+          {symbolSignal.symbol}
+        </Text>
+      </View>
+      <View className="items-end gap-2">
+        <NumericText className="text-base font-semibold text-primary">
+          {formatCurrency(symbolSignal.price)}
+        </NumericText>
+        <NumericText className="text-sm font-medium" toneValue={symbolSignal.change_pct}>
+          {symbolSignal.change_pct > 0 ? '+' : ''}
+          {symbolSignal.change_pct.toFixed(2)}%
+        </NumericText>
+        <View className="flex-row flex-wrap justify-end gap-2">
+          {symbolSignal.signals.map((signal) => {
+            const strategyName = t(`strategy.strategies.${signal.strategy_id}.name`, {
+              defaultValue: signal.strategy_name,
+            });
+
+            return (
+              <View
+                key={`${symbolSignal.symbol}-${signal.strategy_id}`}
+                className={`rounded-full border px-2 py-1 ${getSignalToneClasses(signal.signal)}`}>
+                <Text className="text-[11px] font-medium leading-4">
+                  {strategyName} · {t(`home.signals.${signal.signal}`)}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </Animated.View>
+  );
+});
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
+  const [signals, setSignals] = useState<SymbolSignalSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signalsLoading, setSignalsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signalsError, setSignalsError] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
 
   const loadDashboard = useCallback(async () => {
     setError(null);
     const nextDashboard = await getDashboard();
     setDashboard(nextDashboard);
+  }, []);
+
+  const loadSignals = useCallback(async () => {
+    setSignalsError(null);
+    const nextSignals = await getWatchlistSignals();
+    setSignals(nextSignals);
   }, []);
 
   useEffect(() => {
@@ -139,18 +212,41 @@ export default function HomeScreen() {
     void initialize();
   }, [loadDashboard, t]);
 
+  useEffect(() => {
+    async function initializeSignals() {
+      try {
+        await loadSignals();
+      } catch (loadError) {
+        setSignalsError(
+          loadError instanceof Error ? loadError.message : t('home.signals.errors.load')
+        );
+      } finally {
+        setSignalsLoading(false);
+      }
+    }
+
+    void initializeSignals();
+  }, [loadSignals, t]);
+
   async function refresh() {
     setRefreshing(true);
     try {
-      await loadDashboard();
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : t('home.errors.refresh'));
+      await Promise.all([
+        loadDashboard().catch((loadError) => {
+          setError(loadError instanceof Error ? loadError.message : t('home.errors.refresh'));
+        }),
+        loadSignals().catch((loadError) => {
+          setSignalsError(
+            loadError instanceof Error ? loadError.message : t('home.signals.errors.load')
+          );
+        }),
+      ]);
     } finally {
       setRefreshing(false);
     }
   }
 
-  if (loading || dashboard === null) {
+  if (loading) {
     return (
       <ScrollView
         className="flex-1 bg-background"
@@ -172,6 +268,32 @@ export default function HomeScreen() {
             <SkeletonBlock className="mt-1 h-6 w-20 rounded-full bg-background/70" />
           </View>
           <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+        </View>
+
+        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+          <View className="gap-2 px-4 pt-5">
+            <SkeletonBlock className="h-6 w-36 rounded-full bg-background/70" />
+            <SkeletonBlock className="h-4 w-60 rounded-full bg-background/70" />
+          </View>
+          <View className="pb-1">
+            {[0, 1, 2].map((index) => (
+              <View
+                key={`signal-skeleton-${index}`}
+                className={`flex-row items-start justify-between px-4 py-4 ${
+                  index === 0 ? '' : 'border-t border-divider'
+                }`}>
+                <View className="flex-1 gap-2 pr-4">
+                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                </View>
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-6 w-28 rounded-full bg-background/70" />
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
@@ -227,6 +349,56 @@ export default function HomeScreen() {
     );
   }
 
+  const signalSection = (
+    <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(80)}>
+      <SectionCard subtitle={t('home.signals.subtitle')} title={t('home.signals.title')}>
+        {signalsLoading ? (
+          <View className="pb-1">
+            {[0, 1, 2].map((index) => (
+              <View
+                key={`signal-loading-${index}`}
+                className={`flex-row items-start justify-between px-4 py-4 ${
+                  index === 0 ? '' : 'border-t border-divider'
+                }`}>
+                <View className="flex-1 gap-2 pr-4">
+                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+                </View>
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
+                  <SkeletonBlock className="h-6 w-32 rounded-full bg-background/70" />
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : signalsError ? (
+          <View className="px-4 py-8">
+            <Text className="text-center text-base text-error" selectable>
+              {signalsError}
+            </Text>
+          </View>
+        ) : signals.length === 0 ? (
+          <View className="px-4 py-8">
+            <Text className="text-center text-base text-secondary">
+              {t('home.signals.empty')}
+            </Text>
+          </View>
+        ) : (
+          signals.map((symbolSignal, index) => (
+            <SignalRow
+              key={symbolSignal.symbol}
+              index={index}
+              reducedMotion={reducedMotion}
+              symbolSignal={symbolSignal}
+              t={t}
+            />
+          ))
+        )}
+      </SectionCard>
+    </Animated.View>
+  );
+
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -249,79 +421,87 @@ export default function HomeScreen() {
         </Animated.Text>
       ) : null}
 
-      <Animated.View
-        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
-        <Link href="/paper-trading" asChild>
-          <Pressable
-            accessibilityLabel={t('accessibility.home.openPaperTrading')}
-            accessibilityRole="button"
-            className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
-            style={{ borderCurve: 'continuous' }}>
-            <View className="flex-row items-start justify-between gap-4">
-              <View className="flex-1 gap-2">
-                <Text className="text-sm text-secondary">{t('home.account.title')}</Text>
-                <NumericText className="text-3xl font-bold text-primary">
-                  {formatCurrency(dashboard.account_summary.total_assets)}
+      {dashboard ? (
+        <Animated.View
+          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
+          <Link href="/paper-trading" asChild>
+            <Pressable
+              accessibilityLabel={t('accessibility.home.openPaperTrading')}
+              accessibilityRole="button"
+              className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
+              style={{ borderCurve: 'continuous' }}>
+              <View className="flex-row items-start justify-between gap-4">
+                <View className="flex-1 gap-2">
+                  <Text className="text-sm text-secondary">{t('home.account.title')}</Text>
+                  <NumericText className="text-3xl font-bold text-primary">
+                    {formatCurrency(dashboard.account_summary.total_assets)}
+                  </NumericText>
+                </View>
+                <NumericText
+                  className="text-base font-semibold"
+                  toneValue={dashboard.account_summary.total_return_rate}>
+                  {formatPercent(dashboard.account_summary.total_return_rate)}
                 </NumericText>
               </View>
-              <NumericText
-                className="text-base font-semibold"
-                toneValue={dashboard.account_summary.total_return_rate}>
-                {formatPercent(dashboard.account_summary.total_return_rate)}
-              </NumericText>
-            </View>
-            <Text className="text-sm font-medium text-accent">{t('home.account.cta')}</Text>
-          </Pressable>
-        </Link>
-      </Animated.View>
+              <Text className="text-sm font-medium text-accent">{t('home.account.cta')}</Text>
+            </Pressable>
+          </Link>
+        </Animated.View>
+      ) : null}
 
-      <Animated.View
-        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(80)}>
-        <SectionCard
-          subtitle={t('home.recentTrades.subtitle')}
-          title={t('home.recentTrades.title')}>
-          {dashboard.recent_trades.length === 0 ? (
-            <View className="px-4 py-8">
-              <Text className="text-center text-base text-secondary">
-                {t('home.recentTrades.empty')}
-              </Text>
-            </View>
-          ) : (
-            dashboard.recent_trades.map((trade, index) => (
-              <TradeRow
-                key={trade.id}
-                index={index}
-                reducedMotion={reducedMotion}
-                sharesUnitLabel={t('paperTrading.sharesUnit')}
-                sideLabel={t(`paperTrading.tradeSide.${trade.side}`)}
-                trade={trade}
-              />
-            ))
-          )}
-        </SectionCard>
-      </Animated.View>
+      {signalSection}
 
-      <Animated.View
-        entering={reducedMotion ? undefined : FadeIn.duration(240).delay(120)}>
-        <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
-          {dashboard.watchlist_quotes.length === 0 ? (
-            <View className="px-4 py-8">
-              <Text className="text-center text-base text-secondary">
-                {t('home.watchlist.empty')}
-              </Text>
-            </View>
-          ) : (
-            dashboard.watchlist_quotes.map((quote, index) => (
-              <QuoteRow
-                key={quote.symbol}
-                index={index}
-                quote={quote}
-                reducedMotion={reducedMotion}
-              />
-            ))
-          )}
-        </SectionCard>
-      </Animated.View>
+      {dashboard ? (
+        <Animated.View
+          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(120)}>
+          <SectionCard
+            subtitle={t('home.recentTrades.subtitle')}
+            title={t('home.recentTrades.title')}>
+            {dashboard.recent_trades.length === 0 ? (
+              <View className="px-4 py-8">
+                <Text className="text-center text-base text-secondary">
+                  {t('home.recentTrades.empty')}
+                </Text>
+              </View>
+            ) : (
+              dashboard.recent_trades.map((trade, index) => (
+                <TradeRow
+                  key={trade.id}
+                  index={index}
+                  reducedMotion={reducedMotion}
+                  sharesUnitLabel={t('paperTrading.sharesUnit')}
+                  sideLabel={t(`paperTrading.tradeSide.${trade.side}`)}
+                  trade={trade}
+                />
+              ))
+            )}
+          </SectionCard>
+        </Animated.View>
+      ) : null}
+
+      {dashboard ? (
+        <Animated.View
+          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(160)}>
+          <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
+            {dashboard.watchlist_quotes.length === 0 ? (
+              <View className="px-4 py-8">
+                <Text className="text-center text-base text-secondary">
+                  {t('home.watchlist.empty')}
+                </Text>
+              </View>
+            ) : (
+              dashboard.watchlist_quotes.map((quote, index) => (
+                <QuoteRow
+                  key={quote.symbol}
+                  index={index}
+                  quote={quote}
+                  reducedMotion={reducedMotion}
+                />
+              ))
+            )}
+          </SectionCard>
+        </Animated.View>
+      ) : null}
     </ScrollView>
   );
 }

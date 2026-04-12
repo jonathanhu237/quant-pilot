@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 from routers.dashboard import router as dashboard_router
 from routers.market import router as market_router
+from routers.signals import router as signals_router
 from routers.strategy import router as strategy_router
 from routers.trading import router as trading_router
 from routers.watchlist import router as watchlist_router
@@ -32,6 +33,7 @@ app.add_middleware(
 
 app.include_router(dashboard_router)
 app.include_router(market_router)
+app.include_router(signals_router)
 app.include_router(strategy_router)
 app.include_router(trading_router)
 app.include_router(watchlist_router)

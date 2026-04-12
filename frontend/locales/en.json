@@ -53,6 +53,17 @@
       "subtitle": "A quick read on the symbols you track most.",
       "empty": "No watchlist quotes yet."
     },
+    "signals": {
+      "title": "Strategy Signals",
+      "subtitle": "Latest signals from built-in strategies on your watchlist.",
+      "empty": "Add stocks to your watchlist to see strategy signals.",
+      "errors": {
+        "load": "Failed to load strategy signals."
+      },
+      "buy": "Buy",
+      "sell": "Sell",
+      "hold": "Hold"
+    },
     "errors": {
       "load": "Failed to load dashboard.",
       "refresh": "Failed to refresh dashboard."
