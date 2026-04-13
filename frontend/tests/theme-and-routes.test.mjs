@@ -218,3 +218,53 @@ test('refreshable tab screens keep pull-to-refresh on the shared root ScrollView
     assert.match(sourceText, /refreshControl=\{/);
   }
 });
+
+test('button primitive keeps filled variants readable and 44pt tall', () => {
+  const sourceText = readFileSync(new URL('../components/ui/button.tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /primary:\s*'onAccent'/);
+  assert.match(sourceText, /destructive:\s*'onAccent'/);
+  assert.match(sourceText, /sm:\s*'min-h-11 px-3 py-2'/);
+  assert.doesNotMatch(sourceText, /resolvedTextTone === 'up'/);
+});
+
+test('pill selector defaults selected text to on-accent and documents the text-color rule', () => {
+  const sourceText = readFileSync(new URL('../components/pill-selector.tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /Text color lives on the <Text> child, not the wrapper\./);
+  assert.match(sourceText, /selectedLabelClassName = 'text-on-accent'/);
+});
+
+test('input primitive relies on tokenized body typography instead of inline font sizing', () => {
+  const sourceText = readFileSync(new URL('../components/ui/input.tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /borderCurve: 'continuous'/);
+  assert.doesNotMatch(sourceText, /fontSize:\s*16/);
+  assert.doesNotMatch(sourceText, /lineHeight:\s*undefined/);
+});
+
+test('tab header actions use one secondary-button chrome language across tabs', () => {
+  const homeLayout = readFileSync(new URL('../app/(tabs)/(home)/_layout.tsx', import.meta.url), 'utf8');
+  const marketLayout = readFileSync(new URL('../app/(tabs)/market/_layout.tsx', import.meta.url), 'utf8');
+  const paperLayout = readFileSync(
+    new URL('../app/(tabs)/paper-trading/_layout.tsx', import.meta.url),
+    'utf8'
+  );
+
+  assert.match(homeLayout, /<View className="flex-row items-center gap-2">/);
+  assert.equal(homeLayout.match(/variant="secondary"/g)?.length, 2);
+  assert.match(marketLayout, /variant="secondary"/);
+  assert.match(marketLayout, /color=\{palette\.accent\}/);
+  assert.match(paperLayout, /variant="secondary"/);
+  assert.doesNotMatch(paperLayout, /size="sm"/);
+});
+
+test('home signal rows keep the signal-history tap target stretched across the leading column', () => {
+  const sourceText = readFileSync(new URL('../app/(tabs)/(home)/index.tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /pathname:\s*HOME_SIGNAL_HISTORY_ROUTE/);
+  assert.match(sourceText, /className="flex-1 gap-1 active:opacity-80"/);
+  assert.match(sourceText, /trailing=\{\s*<View className="items-end gap-2">/);
+  assert.match(sourceText, /<View className="items-end gap-1">/);
+  assert.doesNotMatch(sourceText, /<View className="flex-row flex-wrap justify-end gap-2">/);
+});

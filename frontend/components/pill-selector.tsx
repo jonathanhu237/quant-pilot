@@ -1,3 +1,4 @@
+// Text color lives on the <Text> child, not the wrapper.
 import { Pressable, Text, View } from 'react-native';
 
 type PillSelectorOption<T extends string> = {
@@ -18,7 +19,7 @@ export function PillSelector<T extends string>({
   className,
   onChange,
   options,
-  selectedLabelClassName = 'text-primary',
+  selectedLabelClassName = 'text-on-accent',
   selectedValue,
   unselectedLabelClassName = 'text-secondary',
 }: PillSelectorProps<T>) {

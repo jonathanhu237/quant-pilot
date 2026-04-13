@@ -167,7 +167,7 @@ const SignalRow = memo(function SignalRow({
                 symbol: symbolSignal.symbol,
               })}
               accessibilityRole="button"
-              className="gap-1 active:opacity-80"
+              className="flex-1 gap-1 active:opacity-80"
               hitSlop={4}>
               <Body weight="semibold">{symbolSignal.name}</Body>
               <Body selectable tone="secondary">
@@ -177,7 +177,7 @@ const SignalRow = memo(function SignalRow({
           </Link>
         }
         trailing={
-          <View className="gap-2">
+          <View className="items-end gap-2">
             <NumericText className="text-body font-semibold text-primary">
               {formatCurrency(symbolSignal.price)}
             </NumericText>
@@ -185,7 +185,7 @@ const SignalRow = memo(function SignalRow({
               {symbolSignal.change_pct > 0 ? '+' : ''}
               {symbolSignal.change_pct.toFixed(2)}%
             </NumericText>
-            <View className="flex-row flex-wrap justify-end gap-2">
+            <View className="items-end gap-1">
               {symbolSignal.signals.map((signal) => {
                 const strategyName = t(`strategy.strategies.${signal.strategy_id}.name`, {
                   defaultValue: signal.strategy_name,

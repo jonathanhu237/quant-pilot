@@ -15,7 +15,7 @@ import { useAppTheme } from '@/lib/theme-context';
 
 type ButtonVariant = 'destructive' | 'ghost' | 'primary' | 'secondary';
 type ButtonSize = 'lg' | 'md' | 'sm';
-type TextTone = 'accent' | 'down' | 'onAccent' | 'primary' | 'secondary' | 'up';
+type TextTone = 'accent' | 'onAccent' | 'primary' | 'secondary';
 
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   children?: ReactNode;
@@ -41,13 +41,13 @@ const variantClasses: Record<ButtonVariant, string> = {
 const sizeClasses: Record<ButtonSize, string> = {
   lg: 'min-h-11 px-5 py-3',
   md: 'min-h-11 px-4 py-3',
-  sm: 'min-h-9 px-3 py-2',
+  sm: 'min-h-11 px-3 py-2',
 };
 
 const defaultTextTones: Record<ButtonVariant, TextTone> = {
-  destructive: 'primary',
+  destructive: 'onAccent',
   ghost: 'secondary',
-  primary: 'primary',
+  primary: 'onAccent',
   secondary: 'secondary',
 };
 
@@ -76,10 +76,8 @@ export function Button({
       ? palette.accent
       : resolvedTextTone === 'onAccent'
         ? palette.onAccent
-      : resolvedTextTone === 'secondary'
-        ? palette.secondary
-        : resolvedTextTone === 'up'
-          ? palette.accent
+        : resolvedTextTone === 'secondary'
+          ? palette.secondary
           : palette.primary;
 
   return (

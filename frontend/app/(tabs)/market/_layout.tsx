@@ -22,8 +22,9 @@ export default function MarketStackLayout() {
             <Link href={MARKET_ADD_SYMBOL_ROUTE} asChild>
               <Button
                 accessibilityLabel={t('accessibility.market.addSymbol')}
-                leftIcon={<IconSymbol color={palette.onAccent} name="plus" size={18} />}
+                leftIcon={<IconSymbol color={palette.accent} name="plus" size={18} />}
                 square
+                variant="secondary"
               />
             </Link>
           ),

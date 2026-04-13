@@ -20,7 +20,8 @@ export default function PaperTradingStackLayout() {
             <Link href={PAPER_TRADING_NEW_TRADE_ROUTE} asChild>
               <Button
                 accessibilityLabel={t('accessibility.paperTrading.openTradeSheet')}
-                size="sm">
+                textTone="accent"
+                variant="secondary">
                 {t('paperTrading.tradeButton')}
               </Button>
             </Link>

@@ -347,7 +347,6 @@ export default function PaperTradingScreen() {
                 { label: t('paperTrading.tabs.history'), value: 'history' },
               ]}
               selectedValue={activeTab}
-              unselectedLabelClassName="text-secondary"
             />
           </Animated.View>
 

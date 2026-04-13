@@ -18,7 +18,7 @@ export function Input({ className, placeholderTextColor, style, ...props }: Inpu
         className
       )}
       placeholderTextColor={placeholderTextColor ?? palette.placeholder}
-      style={[{ borderCurve: 'continuous', fontSize: 16, lineHeight: undefined }, style]}
+      style={[{ borderCurve: 'continuous' }, style]}
     />
   );
 }
