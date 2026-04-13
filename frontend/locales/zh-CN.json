@@ -12,6 +12,7 @@
       "switchToLightTheme": "切换到浅色主题",
       "switchToDarkTheme": "切换到深色主题",
       "openPaperTrading": "打开模拟交易",
+      "openSignalHistory": "查看 {{symbol}} 的信号历史",
       "tradeFromSignal": "根据 {{strategy}} 的 {{side}} 信号交易 {{symbol}}"
     },
     "market": {
@@ -67,6 +68,13 @@
         "signalDateLabel": "信号日期",
         "priceLabel": "当前价",
         "symbolLabel": "股票代码"
+      },
+      "history": {
+        "title": "信号历史",
+        "empty": "暂无信号历史，等待每日快照。",
+        "errors": {
+          "load": "加载信号历史失败。"
+        }
       },
       "buy": "买入",
       "sell": "卖出",

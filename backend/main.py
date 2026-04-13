@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 import models.trading  # noqa: F401
+import models.signal_history  # noqa: F401
 import models.watchlist  # noqa: F401
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,13 +13,16 @@ from routers.signals import router as signals_router
 from routers.strategy import router as strategy_router
 from routers.trading import router as trading_router
 from routers.watchlist import router as watchlist_router
+from services.scheduler import start_scheduler, stop_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    start_scheduler(app)
     yield
+    stop_scheduler()
 
 
 app = FastAPI(title="Quant Pilot API", lifespan=lifespan)

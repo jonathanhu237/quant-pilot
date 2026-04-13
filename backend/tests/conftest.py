@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 
 import pytest_asyncio
+import models.signal_history  # noqa: F401
 import models.trading  # noqa: F401
 import models.watchlist  # noqa: F401
 from fastapi import FastAPI

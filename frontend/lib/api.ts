@@ -116,6 +116,14 @@ export type SymbolSignalSnapshot = {
   signals: StrategySignalSnapshot[];
 };
 
+export type SignalHistoryEntry = {
+  symbol: string;
+  signal: 'buy' | 'sell' | 'hold';
+  signal_date: string;
+  strategy_id: string;
+  strategy_name: string;
+};
+
 type WatchlistItem = {
   symbol: string;
 };
@@ -254,4 +262,17 @@ export async function getDashboard(): Promise<DashboardResponse> {
 
 export async function getWatchlistSignals(): Promise<SymbolSignalSnapshot[]> {
   return request<SymbolSignalSnapshot[]>('/api/signals/watchlist');
+}
+
+export async function getSignalHistory(symbol: string, days?: number): Promise<SignalHistoryEntry[]> {
+  const query = new URLSearchParams();
+
+  if (typeof days === 'number') {
+    query.set('days', String(days));
+  }
+
+  const queryString = query.toString();
+  return request<SignalHistoryEntry[]>(
+    `/api/signals/history/${encodeURIComponent(symbol)}${queryString ? `?${queryString}` : ''}`
+  );
 }

@@ -12,6 +12,7 @@
       "switchToLightTheme": "Switch to light theme",
       "switchToDarkTheme": "Switch to dark theme",
       "openPaperTrading": "Open paper trading",
+      "openSignalHistory": "View {{symbol}} signal history",
       "tradeFromSignal": "Trade {{symbol}} based on {{strategy}} {{side}} signal"
     },
     "market": {
@@ -67,6 +68,13 @@
         "signalDateLabel": "Signal date",
         "priceLabel": "Current price",
         "symbolLabel": "Symbol"
+      },
+      "history": {
+        "title": "Signal History",
+        "empty": "No signal history yet. Wait for the daily snapshot.",
+        "errors": {
+          "load": "Failed to load signal history."
+        }
       },
       "buy": "Buy",
       "sell": "Sell",

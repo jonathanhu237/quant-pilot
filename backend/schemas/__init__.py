@@ -1,5 +1,6 @@
 from .dashboard import AccountSummary, DashboardResponse, WatchlistQuoteSnapshot
 from .market import StockQuote
+from .signal_history import SignalHistoryEntry
 from .strategy import (
     BacktestRequest,
     BacktestResult,
@@ -23,6 +24,7 @@ __all__ = [
     "DashboardResponse",
     "PositionResponse",
     "StockQuote",
+    "SignalHistoryEntry",
     "StrategyMeta",
     "StrategyParameterDefinition",
     "TradeActionResponse",

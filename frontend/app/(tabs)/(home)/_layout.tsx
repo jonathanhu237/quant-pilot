@@ -78,6 +78,10 @@ export default function HomeStackLayout() {
         name="new-trade"
         options={getThemedSheetOptions(isDark, t('home.signals.tradeSheet.title'))}
       />
+      <Stack.Screen
+        name="signal-history"
+        options={getThemedSheetOptions(isDark, t('home.signals.history.title'))}
+      />
     </Stack>
   );
 }

@@ -140,12 +140,29 @@ const SignalRow = memo(function SignalRow({
       className={`flex-row items-start justify-between px-4 py-4 ${
         index === 0 ? '' : 'border-t border-divider'
       }`}>
-      <View className="flex-1 gap-1 pr-4">
-        <Text className="text-base font-semibold text-primary">{symbolSignal.name}</Text>
-        <Text className="text-sm text-secondary" selectable>
-          {symbolSignal.symbol}
-        </Text>
-      </View>
+      <Link
+        href={{
+          params: {
+            stockName: symbolSignal.name,
+            symbol: symbolSignal.symbol,
+          },
+          pathname: './signal-history',
+        }}
+        asChild>
+        <Pressable
+          accessibilityLabel={t('accessibility.home.openSignalHistory', {
+            stockName: symbolSignal.name,
+            symbol: symbolSignal.symbol,
+          })}
+          accessibilityRole="button"
+          className="flex-1 gap-1 pr-4 active:opacity-80"
+          hitSlop={4}>
+          <Text className="text-base font-semibold text-primary">{symbolSignal.name}</Text>
+          <Text className="text-sm text-secondary" selectable>
+            {symbolSignal.symbol}
+          </Text>
+        </Pressable>
+      </Link>
       <View className="items-end gap-2">
         <NumericText className="text-base font-semibold text-primary">
           {formatCurrency(symbolSignal.price)}
