@@ -1,8 +1,8 @@
 import { Link } from 'expo-router';
-import { Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Stack } from 'expo-router/stack';
 
+import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { setMarketSearchQuery } from '@/lib/market-search';
 import { getThemedSheetOptions, getThemedStackOptions } from '@/lib/navigation';
@@ -11,7 +11,7 @@ import { useAppTheme } from '@/lib/theme-context';
 
 export default function MarketStackLayout() {
   const { t } = useTranslation();
-  const { isDark } = useAppTheme();
+  const { isDark, palette } = useAppTheme();
 
   return (
     <Stack screenOptions={getThemedStackOptions(isDark, true)}>
@@ -20,14 +20,11 @@ export default function MarketStackLayout() {
         options={{
           headerRight: () => (
             <Link href={MARKET_ADD_SYMBOL_ROUTE} asChild>
-              <Pressable
+              <Button
                 accessibilityLabel={t('accessibility.market.addSymbol')}
-                accessibilityRole="button"
-                className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
-                hitSlop={4}
-                style={{ borderCurve: 'continuous' }}>
-                <IconSymbol color="#FFFFFF" name="plus" size={18} />
-              </Pressable>
+                leftIcon={<IconSymbol color={palette.onAccent} name="plus" size={18} />}
+                square
+              />
             </Link>
           ),
           headerSearchBarOptions: {

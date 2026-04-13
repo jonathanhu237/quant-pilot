@@ -1,10 +1,8 @@
 import { memo, useCallback, useDeferredValue, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import {
-  Pressable,
   RefreshControl,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -17,9 +15,13 @@ import Animated, {
 import { useTranslation } from 'react-i18next';
 
 import { NumericText } from '@/components/numeric-text';
+import { Button } from '@/components/ui/button';
+import { Body, Heading, Title } from '@/components/ui/typography';
+import { ListRow } from '@/components/ui/list-row';
 import { SkeletonBlock } from '@/components/skeleton-block';
 import { getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
 import { setMarketSearchQuery, useMarketSearchQuery } from '@/lib/market-search';
+import { useAppTheme } from '@/lib/theme-context';
 
 type MarketRowData = {
   changePct: number | null;
@@ -72,41 +74,49 @@ const MarketListRow = memo(function MarketListRow({
   return (
     <Animated.View
       entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 200))}
-      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
-      className={`flex-row items-center gap-3 py-4 ${
-        index === 0 ? '' : 'border-t border-divider'
-      }`}>
-      <View className="flex-1 gap-1">
-        <Text className="text-base font-semibold text-primary">{item.name}</Text>
-        <Text className="text-sm text-secondary" selectable>
-          {item.symbol}
-        </Text>
-      </View>
-      <View className="items-end gap-1">
-        <NumericText className="text-lg font-semibold text-primary">
-          {item.price === null ? '--' : item.price.toFixed(2)}
-        </NumericText>
-        <NumericText className="text-sm font-medium" toneValue={item.changePct}>
-          {getChangeText(item.changePct)}
-        </NumericText>
-      </View>
-      <Pressable
-        accessibilityLabel={deleteAccessibilityLabel}
-        accessibilityRole="button"
-        className="ml-3 min-h-11 rounded-xl px-3 py-2 active:opacity-80"
-        hitSlop={4}
-        onPress={() => {
-          onDelete(item.symbol);
-        }}
-        style={{ borderCurve: 'continuous' }}>
-        <Text className="text-sm font-medium text-secondary">{deleteLabel}</Text>
-      </Pressable>
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}>
+      <ListRow
+        align="center"
+        className="gap-3"
+        isFirst={index === 0}
+        leading={
+          <View className="gap-1">
+            <Heading className="text-body">{item.name}</Heading>
+            <Body selectable tone="secondary">
+              {item.symbol}
+            </Body>
+          </View>
+        }
+        trailing={
+          <View className="flex-row items-center gap-3">
+            <View className="items-end gap-1">
+              <NumericText className="text-title font-semibold text-primary">
+                {item.price === null ? '--' : item.price.toFixed(2)}
+              </NumericText>
+              <NumericText className="text-label font-medium" toneValue={item.changePct}>
+                {getChangeText(item.changePct)}
+              </NumericText>
+            </View>
+            <Button
+              accessibilityLabel={deleteAccessibilityLabel}
+              onPress={() => {
+                onDelete(item.symbol);
+              }}
+              size="sm"
+              textTone="secondary"
+              variant="ghost">
+              {deleteLabel}
+            </Button>
+          </View>
+        }
+      />
     </Animated.View>
   );
 });
 
 export default function MarketScreen() {
   const { t } = useTranslation();
+  const { palette } = useAppTheme();
   const [rows, setRows] = useState<MarketRowData[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -223,7 +233,7 @@ export default function MarketScreen() {
       }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={palette.accent} />
       }>
       {loading ? (
         <>
@@ -231,27 +241,31 @@ export default function MarketScreen() {
             <SkeletonBlock className="h-4 w-48 rounded-full" />
           </View>
           {[0, 1, 2, 3, 4].map((index) => (
-            <View
+            <ListRow
+              align="center"
+              className="gap-3"
+              isFirst={index === 0}
               key={`market-skeleton-${index}`}
-              className={`flex-row items-center gap-3 py-4 ${
-                index === 0 ? '' : 'border-t border-divider'
-              }`}>
-              <View className="flex-1 gap-2">
-                <SkeletonBlock className="h-4 w-28 rounded-full" />
-                <SkeletonBlock className="h-4 w-16 rounded-full" />
-              </View>
-              <View className="items-end gap-2">
-                <SkeletonBlock className="h-5 w-20 rounded-full" />
-                <SkeletonBlock className="h-4 w-16 rounded-full" />
-              </View>
-            </View>
+              leading={
+                <View className="gap-2">
+                  <SkeletonBlock className="h-4 w-28 rounded-full" />
+                  <SkeletonBlock className="h-4 w-16 rounded-full" />
+                </View>
+              }
+              trailing={
+                <View className="items-end gap-2">
+                  <SkeletonBlock className="h-5 w-20 rounded-full" />
+                  <SkeletonBlock className="h-4 w-16 rounded-full" />
+                </View>
+              }
+            />
           ))}
         </>
       ) : (
         <>
           <View className="pb-6">
             <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
-              <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
+              <Body tone="secondary">{t('market.subtitle')}</Body>
             </Animated.View>
             {error ? (
               <Animated.Text
@@ -266,10 +280,10 @@ export default function MarketScreen() {
 
           {filteredRows.length === 0 ? (
             <View className="flex-1 items-center justify-center gap-2 px-6">
-              <Text className="text-xl font-semibold text-primary">{t('market.emptyTitle')}</Text>
-              <Text className="text-center text-sm leading-6 text-secondary">
+              <Title>{t('market.emptyTitle')}</Title>
+              <Body className="text-center" tone="secondary">
                 {t('market.emptySubtitle')}
-              </Text>
+              </Body>
             </View>
           ) : (
             filteredRows.map((item, index) => (

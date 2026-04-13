@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
   FadeIn,
@@ -13,12 +13,15 @@ import { NumericText } from '@/components/numeric-text';
 import { PillSelector } from '@/components/pill-selector';
 import { SectionCard } from '@/components/section-card';
 import { SkeletonBlock } from '@/components/skeleton-block';
+import { ListRow } from '@/components/ui/list-row';
+import { Body, Caption, Label } from '@/components/ui/typography';
 import {
   getTradeHistory,
   getTradingAccount,
   type TradingAccount,
   type TradingTrade,
 } from '@/lib/api';
+import { useAppTheme } from '@/lib/theme-context';
 
 type TradingTab = 'history' | 'positions';
 type TradingPosition = TradingAccount['positions'][number];
@@ -55,46 +58,50 @@ const PositionRow = memo(function PositionRow({
   return (
     <Animated.View
       entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 200))}
-      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
-      className={`px-4 py-4 ${
-        index === 0 ? '' : 'border-t border-divider'
-      }`}>
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-4">
-          <Text className="text-base font-semibold text-primary">{position.name}</Text>
-          <NumericText className="mt-1 text-sm text-secondary">
-            {position.symbol} · {position.shares}
-            {sharesUnitLabel}
-          </NumericText>
-        </View>
-        <View className="items-end">
-          <NumericText className="text-base font-semibold" toneValue={position.unrealized_pnl}>
-            {formatPercent(position.unrealized_pnl_pct)}
-          </NumericText>
-          <NumericText className="mt-1 text-sm" toneValue={position.unrealized_pnl}>
-            {formatCurrency(position.unrealized_pnl)}
-          </NumericText>
-        </View>
-      </View>
-
-      <View className="mt-4 flex-row flex-wrap justify-between gap-y-3">
-        <View className="w-[32%]">
-          <Text className="text-xs text-secondary">{costLabel}</Text>
-          <NumericText className="mt-1 text-sm font-medium text-primary">
-            {formatCurrency(position.average_cost)}
-          </NumericText>
-        </View>
-        <View className="w-[32%]">
-          <Text className="text-xs text-secondary">{currentLabel}</Text>
-          <NumericText className="mt-1 text-sm font-medium text-primary">
-            {formatCurrency(position.current_price)}
-          </NumericText>
-        </View>
-        <View className="w-[32%]">
-          <Text className="text-xs text-secondary">{marketValueLabel}</Text>
-          <NumericText className="mt-1 text-sm font-medium text-primary">
-            {formatCurrency(position.market_value)}
-          </NumericText>
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}>
+      <View className={index === 0 ? '' : 'border-t border-divider'}>
+        <ListRow
+          className="pb-0"
+          isFirst
+          leading={
+            <View>
+              <Body weight="semibold">{position.name}</Body>
+              <NumericText className="mt-1 text-label text-secondary">
+                {position.symbol} · {position.shares}
+                {sharesUnitLabel}
+              </NumericText>
+            </View>
+          }
+          trailing={
+            <View>
+              <NumericText className="text-body font-semibold" toneValue={position.unrealized_pnl}>
+                {formatPercent(position.unrealized_pnl_pct)}
+              </NumericText>
+              <NumericText className="mt-1 text-label" toneValue={position.unrealized_pnl}>
+                {formatCurrency(position.unrealized_pnl)}
+              </NumericText>
+            </View>
+          }
+        />
+        <View className="mt-4 flex-row flex-wrap justify-between gap-y-3 px-row-x pb-row-y">
+          <View className="w-[32%]">
+            <Caption tone="secondary">{costLabel}</Caption>
+            <NumericText className="mt-1 text-label font-medium text-primary">
+              {formatCurrency(position.average_cost)}
+            </NumericText>
+          </View>
+          <View className="w-[32%]">
+            <Caption tone="secondary">{currentLabel}</Caption>
+            <NumericText className="mt-1 text-label font-medium text-primary">
+              {formatCurrency(position.current_price)}
+            </NumericText>
+          </View>
+          <View className="w-[32%]">
+            <Caption tone="secondary">{marketValueLabel}</Caption>
+            <NumericText className="mt-1 text-label font-medium text-primary">
+              {formatCurrency(position.market_value)}
+            </NumericText>
+          </View>
         </View>
       </View>
     </Animated.View>
@@ -117,33 +124,38 @@ const HistoryRow = memo(function HistoryRow({
   return (
     <Animated.View
       entering={reducedMotion ? undefined : FadeIn.duration(220).delay(Math.min(index * 40, 200))}
-      layout={reducedMotion ? undefined : LinearTransition.duration(220)}
-      className={`px-4 py-4 ${
-        index === 0 ? '' : 'border-t border-divider'
-      }`}>
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-4">
-          <Text className="text-base font-semibold text-accent">{sideLabel}</Text>
-          <NumericText className="mt-1 text-sm text-secondary">
-            {trade.symbol} · {trade.shares}
-            {sharesUnitLabel}
-          </NumericText>
-        </View>
-        <View className="items-end">
-          <NumericText className="text-base font-semibold text-primary">
-            {formatCurrency(trade.price)}
-          </NumericText>
-          <Text className="mt-1 text-xs text-secondary" selectable>
-            {new Date(trade.created_at).toLocaleString()}
-          </Text>
-        </View>
-      </View>
+      layout={reducedMotion ? undefined : LinearTransition.duration(220)}>
+      <ListRow
+        isFirst={index === 0}
+        leading={
+          <View>
+            <Body tone="accent" weight="semibold">
+              {sideLabel}
+            </Body>
+            <NumericText className="mt-1 text-label text-secondary">
+              {trade.symbol} · {trade.shares}
+              {sharesUnitLabel}
+            </NumericText>
+          </View>
+        }
+        trailing={
+          <View>
+            <NumericText className="text-body font-semibold text-primary">
+              {formatCurrency(trade.price)}
+            </NumericText>
+            <Caption className="mt-1" selectable tone="secondary">
+              {new Date(trade.created_at).toLocaleString()}
+            </Caption>
+          </View>
+        }
+      />
     </Animated.View>
   );
 });
 
 export default function PaperTradingScreen() {
   const { t } = useTranslation();
+  const { palette } = useAppTheme();
   const [account, setAccount] = useState<TradingAccount | null>(null);
   const [history, setHistory] = useState<TradingTrade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -216,13 +228,13 @@ export default function PaperTradingScreen() {
       contentContainerStyle={{ gap: 24, paddingBottom: 40, paddingHorizontal: 20, paddingTop: 8 }}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={palette.accent} />
       }>
       {loading || account === null ? (
         <>
           <SkeletonBlock className="h-4 w-56 rounded-full" />
 
-          <SectionCard bodyClassName="px-4 py-5">
+          <SectionCard bodyClassName="px-card-x py-card-y">
             <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
             <SkeletonBlock className="mt-3 h-10 w-44 rounded-2xl bg-background/70" />
 
@@ -245,18 +257,23 @@ export default function PaperTradingScreen() {
             {[0, 1].map((index) => (
               <View
                 key={`paper-row-skeleton-${index}`}
-                className={`px-4 py-4 ${index === 0 ? '' : 'border-t border-divider'}`}>
-                <View className="flex-row items-start justify-between gap-4">
-                  <View className="flex-1 gap-2 pr-4">
-                    <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
-                    <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
-                  </View>
-                  <View className="items-end gap-2">
-                    <SkeletonBlock className="h-5 w-16 rounded-full bg-background/70" />
-                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
-                  </View>
-                </View>
-                <View className="mt-4 flex-row flex-wrap justify-between gap-y-3">
+                className={index === 0 ? '' : 'border-t border-divider'}>
+                <ListRow
+                  isFirst
+                  leading={
+                    <View className="gap-2">
+                      <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                      <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                    </View>
+                  }
+                  trailing={
+                    <View className="items-end gap-2">
+                      <SkeletonBlock className="h-5 w-16 rounded-full bg-background/70" />
+                      <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                    </View>
+                  }
+                />
+                <View className="mt-4 flex-row flex-wrap justify-between gap-y-3 px-row-x pb-row-y">
                   {[0, 1, 2].map((statIndex) => (
                     <View key={`paper-stat-skeleton-${index}-${statIndex}`} className="w-[32%] gap-2">
                       <SkeletonBlock className="h-3 w-16 rounded-full bg-background/70" />
@@ -271,7 +288,7 @@ export default function PaperTradingScreen() {
       ) : (
         <>
           <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
-            <Text className="text-sm leading-6 text-secondary">{t('paperTrading.subtitle')}</Text>
+            <Body tone="secondary">{t('paperTrading.subtitle')}</Body>
           </Animated.View>
 
           {error ? (
@@ -285,41 +302,35 @@ export default function PaperTradingScreen() {
           ) : null}
 
           <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
-            <SectionCard bodyClassName="px-4 py-5">
-              <Text className="text-sm text-secondary">{t('paperTrading.summary.totalAssets')}</Text>
-              <NumericText className="mt-2 text-3xl font-bold text-primary">
+            <SectionCard bodyClassName="px-card-x py-card-y">
+              <Body tone="secondary">{t('paperTrading.summary.totalAssets')}</Body>
+              <NumericText className="mt-2 text-display font-bold text-primary">
                 {formatCurrency(account.total_assets)}
               </NumericText>
 
               <View className="mt-5 flex-row flex-wrap justify-between gap-y-4">
                 <View className="w-[48%]">
-                  <Text className="text-sm text-secondary">{t('paperTrading.summary.cash')}</Text>
-                  <NumericText className="mt-1 text-lg font-semibold text-primary">
+                  <Label tone="secondary">{t('paperTrading.summary.cash')}</Label>
+                  <NumericText className="mt-1 text-heading font-semibold text-primary">
                     {formatCurrency(account.cash_balance)}
                   </NumericText>
                 </View>
                 <View className="w-[48%]">
-                  <Text className="text-sm text-secondary">
-                    {t('paperTrading.summary.marketValue')}
-                  </Text>
-                  <NumericText className="mt-1 text-lg font-semibold text-primary">
+                  <Label tone="secondary">{t('paperTrading.summary.marketValue')}</Label>
+                  <NumericText className="mt-1 text-heading font-semibold text-primary">
                     {formatCurrency(account.market_value)}
                   </NumericText>
                 </View>
                 <View className="w-[48%]">
-                  <Text className="text-sm text-secondary">
-                    {t('paperTrading.summary.totalPnl')}
-                  </Text>
-                  <NumericText className="mt-1 text-lg font-semibold" toneValue={account.total_pnl}>
+                  <Label tone="secondary">{t('paperTrading.summary.totalPnl')}</Label>
+                  <NumericText className="mt-1 text-heading font-semibold" toneValue={account.total_pnl}>
                     {formatCurrency(account.total_pnl)}
                   </NumericText>
                 </View>
                 <View className="w-[48%]">
-                  <Text className="text-sm text-secondary">
-                    {t('paperTrading.summary.returnRate')}
-                  </Text>
+                  <Label tone="secondary">{t('paperTrading.summary.returnRate')}</Label>
                   <NumericText
-                    className="mt-1 text-lg font-semibold"
+                    className="mt-1 text-heading font-semibold"
                     toneValue={account.total_return_rate}>
                     {formatPercent(account.total_return_rate)}
                   </NumericText>
@@ -343,10 +354,10 @@ export default function PaperTradingScreen() {
           <SectionCard>
             {activeTab === 'positions' ? (
               account.positions.length === 0 ? (
-                <View className="px-4 py-8">
-                  <Text className="text-center text-base text-secondary">
+                <View className="px-row-x py-8">
+                  <Body className="text-center" tone="secondary">
                     {t('paperTrading.emptyPositions')}
-                  </Text>
+                  </Body>
                 </View>
               ) : (
                 account.positions.map((position, index) => (
@@ -363,10 +374,10 @@ export default function PaperTradingScreen() {
                 ))
               )
             ) : history.length === 0 ? (
-              <View className="px-4 py-8">
-                <Text className="text-center text-base text-secondary">
+              <View className="px-row-x py-8">
+                <Body className="text-center" tone="secondary">
                   {t('paperTrading.emptyHistory')}
-                </Text>
+                </Body>
               </View>
             ) : (
               history.map((trade, index) => (

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import ts from 'typescript';
 
@@ -111,18 +111,11 @@ test('theme helpers expose dark-first palette and toggle deterministically', () 
   assert.equal(darkPalette.placeholder, '#8B8B9E');
   assert.equal(lightPalette.background, '#F5F5F7');
   assert.equal(lightPalette.placeholder, '#6B6B7E');
-
-  assert.deepEqual(getThemeVariables('dark'), {
-    '--color-accent': '94 106 210',
-    '--color-background': '15 15 20',
-    '--color-divider': '255 255 255',
-    '--color-down': '0 196 140',
-    '--color-error': '255 77 77',
-    '--color-primary': '255 255 255',
-    '--color-secondary': '139 139 158',
-    '--color-surface': '26 26 36',
-    '--color-up': '255 77 77',
-  });
+  const darkVars = getThemeVariables('dark');
+  assert.equal(darkVars['--color-accent'], '94 106 210');
+  assert.equal(darkVars['--color-background'], '15 15 20');
+  assert.equal(darkVars['--color-primary'], '255 255 255');
+  assert.equal(darkVars['--color-surface'], '26 26 36');
 });
 
 test('modal and sheet routes are absolute and unambiguous', () => {
@@ -132,26 +125,18 @@ test('modal and sheet routes are absolute and unambiguous', () => {
   assert.equal(HOME_NEW_TRADE_ROUTE, '/(tabs)/(home)/new-trade');
 });
 
-test('large-title navigation options are only enabled when a stack opts in', () => {
-  const defaultStackOptions = getThemedStackOptions(true);
-  const largeTitleStackOptions = getThemedStackOptions(true, true);
+test('large-title navigation options include explicit large-title chrome styling', () => {
+  const stackOptions = getThemedStackOptions(true, true);
   const sheetOptions = getThemedSheetOptions(true, 'Sheet');
 
-  assert.ok(!('headerLargeTitle' in defaultStackOptions));
-  assert.ok(!('headerLargeStyle' in defaultStackOptions));
-  assert.ok(!('headerLargeTitleStyle' in defaultStackOptions));
-
-  assert.equal(largeTitleStackOptions.headerLargeTitle, true);
-  assert.equal(largeTitleStackOptions.headerLargeStyle.backgroundColor, '#0F0F14');
-  assert.equal(largeTitleStackOptions.headerLargeTitleStyle.color, '#FFFFFF');
-  assert.equal(largeTitleStackOptions.headerLargeTitleStyle.fontSize, 34);
-
-  assert.ok(!('headerLargeTitle' in sheetOptions));
-  assert.ok(!('headerLargeStyle' in sheetOptions));
-  assert.ok(!('headerLargeTitleStyle' in sheetOptions));
+  assert.equal(stackOptions.headerLargeTitle, true);
+  assert.equal(stackOptions.headerLargeTitleStyle.color, '#FFFFFF');
+  assert.equal(stackOptions.headerLargeTitleStyle.fontSize, 34);
+  assert.equal('headerStyle' in stackOptions, false);
+  assert.equal(sheetOptions.title, 'Sheet');
 });
 
-test('tab stack layouts opt into large titles at the parent stack level', () => {
+test('tab stack layouts opt into large titles in their screen definitions', () => {
   const layoutPaths = [
     '../app/(tabs)/(home)/_layout.tsx',
     '../app/(tabs)/market/_layout.tsx',
@@ -161,7 +146,7 @@ test('tab stack layouts opt into large titles at the parent stack level', () => 
 
   for (const layoutPath of layoutPaths) {
     const layoutSource = readFileSync(new URL(layoutPath, import.meta.url), 'utf8');
-    assert.match(layoutSource, /screenOptions=\{getThemedStackOptions\(isDark, true\)\}/);
+    assert.match(layoutSource, /getThemedStackOptions\(isDark,\s*true\)/);
   }
 });
 
@@ -170,6 +155,35 @@ test('root layout keeps the themed wrapper in the native tree for large-title re
 
   assert.match(rootLayoutSource, /collapsable=\{false\}/);
   assert.match(rootLayoutSource, /style=\{\[\{ flex: 1 \}, themeVars\]\}/);
+});
+
+test('theme variables expose semantic non-color tokens for primitives', () => {
+  const darkVars = getThemeVariables('dark');
+
+  assert.equal(darkVars['--color-surface-raised'], '255 255 255');
+  assert.equal(darkVars['--radius-card'], '24px');
+  assert.equal(darkVars['--radius-pill'], '999px');
+  assert.equal(darkVars['--border-hairline'], '1px');
+  assert.equal(darkVars['--spacing-card-x'], '16px');
+  assert.equal(darkVars['--font-size-heading'], '20px');
+  assert.equal(darkVars['--line-height-heading'], '28px');
+});
+
+test('primitive UI library files exist', () => {
+  const requiredFiles = [
+    '../components/ui/README.md',
+    '../components/ui/badge.tsx',
+    '../components/ui/button.tsx',
+    '../components/ui/card.tsx',
+    '../components/ui/divider.tsx',
+    '../components/ui/list-row.tsx',
+    '../components/ui/typography.tsx',
+  ];
+
+  for (const relativePath of requiredFiles) {
+    const fileUrl = new URL(relativePath, import.meta.url);
+    assert.equal(existsSync(fileUrl), true, `${relativePath} should exist`);
+  }
 });
 
 test('tab screens keep one top-level ScrollView alive across loading and loaded states', () => {

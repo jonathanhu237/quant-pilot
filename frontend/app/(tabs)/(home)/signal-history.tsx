@@ -1,11 +1,15 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
 import { SectionCard } from '@/components/section-card';
 import { SkeletonBlock } from '@/components/skeleton-block';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { ListRow } from '@/components/ui/list-row';
+import { Body, Display } from '@/components/ui/typography';
 import { getSignalHistory, type SignalHistoryEntry } from '@/lib/api';
 
 type SignalHistorySection = {
@@ -54,20 +58,8 @@ function groupSignalHistory(entries: SignalHistoryEntry[]) {
   return Array.from(sections.values());
 }
 
-function getSignalLabelClass(signal: SignalHistoryEntry['signal']) {
-  return signal === 'buy'
-    ? 'text-up'
-    : signal === 'sell'
-      ? 'text-down'
-      : 'text-secondary';
-}
-
-function getSignalDotClass(signal: SignalHistoryEntry['signal']) {
-  return signal === 'buy'
-    ? 'bg-up'
-    : signal === 'sell'
-      ? 'bg-down'
-      : 'bg-secondary';
+function getSignalBadgeVariant(signal: SignalHistoryEntry['signal']) {
+  return signal === 'buy' ? 'positive' : signal === 'sell' ? 'negative' : 'neutral';
 }
 
 export default function SignalHistoryScreen() {
@@ -137,74 +129,68 @@ export default function SignalHistoryScreen() {
       }}
       contentInsetAdjustmentBehavior="automatic">
       <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)} className="gap-1 px-1 pt-1">
-        <Text className="text-3xl font-semibold text-primary" numberOfLines={2}>
+        <Display className="text-title" numberOfLines={2}>
           {displayName}
-        </Text>
+        </Display>
         {symbol ? (
-          <Text className="text-sm tracking-[0.24em] text-secondary" selectable>
+          <Body className="tracking-[0.24em]" selectable tone="secondary">
             {symbol}
-          </Text>
+          </Body>
         ) : null}
       </Animated.View>
 
       {loading ? (
         <View className="gap-4">
-          <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+          <Card>
             <View className="gap-2 px-4 pt-5">
               <SkeletonBlock className="h-6 w-40 rounded-full bg-background/70" />
               <SkeletonBlock className="h-4 w-52 rounded-full bg-background/70" />
             </View>
             <View className="pb-1">
               {[0, 1, 2].map((index) => (
-                <View
+                <ListRow
+                  align="center"
+                  className="gap-3"
                   key={`history-skeleton-${index}`}
-                  className={`flex-row items-center justify-between px-4 py-4 ${
-                    index === 0 ? '' : 'border-t border-divider'
-                  }`}>
-                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
-                  <View className="flex-row items-center gap-2">
-                    <SkeletonBlock className="h-2.5 w-2.5 rounded-full bg-background/70" />
-                    <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
-                  </View>
-                </View>
+                  isFirst={index === 0}
+                  leading={<SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />}
+                  trailing={<SkeletonBlock className="h-6 w-16 rounded-full bg-background/70" />}
+                />
               ))}
             </View>
-          </View>
+          </Card>
 
-          <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+          <Card>
             <View className="gap-2 px-4 pt-5">
               <SkeletonBlock className="h-6 w-36 rounded-full bg-background/70" />
               <SkeletonBlock className="h-4 w-48 rounded-full bg-background/70" />
             </View>
             <View className="pb-1">
               {[0, 1, 2].map((index) => (
-                <View
+                <ListRow
+                  align="center"
+                  className="gap-3"
                   key={`history-skeleton-secondary-${index}`}
-                  className={`flex-row items-center justify-between px-4 py-4 ${
-                    index === 0 ? '' : 'border-t border-divider'
-                  }`}>
-                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
-                  <View className="flex-row items-center gap-2">
-                    <SkeletonBlock className="h-2.5 w-2.5 rounded-full bg-background/70" />
-                    <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
-                  </View>
-                </View>
+                  isFirst={index === 0}
+                  leading={<SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />}
+                  trailing={<SkeletonBlock className="h-6 w-16 rounded-full bg-background/70" />}
+                />
               ))}
             </View>
-          </View>
+          </Card>
         </View>
       ) : error ? (
-        <View className="rounded-3xl bg-surface px-4 py-10" style={{ borderCurve: 'continuous' }}>
-          <Text className="text-center text-base text-error" selectable>
+        <Card className="px-card-x py-10">
+          <Body className="text-center" selectable tone="error">
             {error}
-          </Text>
-        </View>
+          </Body>
+        </Card>
       ) : sections.length === 0 ? (
-        <View className="rounded-3xl bg-surface px-4 py-10" style={{ borderCurve: 'continuous' }}>
-          <Text className="text-center text-base text-secondary">
+        <Card className="px-card-x py-10">
+          <Body className="text-center" tone="secondary">
             {t('home.signals.history.empty')}
-          </Text>
-        </View>
+          </Body>
+        </Card>
       ) : (
         sections.map((section, sectionIndex) => (
           <Animated.View
@@ -216,21 +202,21 @@ export default function SignalHistoryScreen() {
               })}
               bodyClassName="pb-1">
               {section.entries.map((entry, entryIndex) => (
-                <View
+                <ListRow
+                  align="center"
                   key={`${section.strategyId}-${entry.signal_date}-${entryIndex}`}
-                  className={`flex-row items-center justify-between px-4 py-4 ${
-                    entryIndex === 0 ? '' : 'border-t border-divider'
-                  }`}>
-                  <Text className="text-sm text-secondary" selectable>
-                    {formatHistoryDate(entry.signal_date)}
-                  </Text>
-                  <View className="flex-row items-center gap-2">
-                    <View className={`h-2.5 w-2.5 rounded-full ${getSignalDotClass(entry.signal)}`} />
-                    <Text className={`text-sm font-medium ${getSignalLabelClass(entry.signal)}`}>
+                  isFirst={entryIndex === 0}
+                  leading={
+                    <Body selectable tone="secondary">
+                      {formatHistoryDate(entry.signal_date)}
+                    </Body>
+                  }
+                  trailing={
+                    <Badge variant={getSignalBadgeVariant(entry.signal)}>
                       {t(`home.signals.${entry.signal}`)}
-                    </Text>
-                  </View>
-                </View>
+                    </Badge>
+                  }
+                />
               ))}
             </SectionCard>
           </Animated.View>

@@ -1,4 +1,6 @@
-import { Text, View, type ViewProps } from 'react-native';
+import { View, type ViewProps } from 'react-native';
+import { Card } from '@/components/ui/card';
+import { Body, Heading } from '@/components/ui/typography';
 
 type SectionCardProps = ViewProps & {
   bodyClassName?: string;
@@ -17,17 +19,17 @@ export function SectionCard({
   ...props
 }: SectionCardProps) {
   return (
-    <View
+    <Card
       {...props}
-      className={`rounded-3xl bg-surface ${className ?? ''}`}
-      style={[{ borderCurve: 'continuous' }, style]}>
+      className={className}
+      style={style}>
       {title || subtitle ? (
         <View className="gap-2 px-4 pt-5">
-          {title ? <Text className="text-xl font-semibold text-primary">{title}</Text> : null}
-          {subtitle ? <Text className="text-sm leading-6 text-secondary">{subtitle}</Text> : null}
+          {title ? <Heading>{title}</Heading> : null}
+          {subtitle ? <Body tone="secondary">{subtitle}</Body> : null}
         </View>
       ) : null}
       <View className={bodyClassName}>{children}</View>
-    </View>
+    </Card>
   );
 }

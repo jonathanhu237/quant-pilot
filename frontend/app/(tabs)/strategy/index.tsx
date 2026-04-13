@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -13,6 +13,10 @@ import { NumericText } from '@/components/numeric-text';
 import { PillSelector } from '@/components/pill-selector';
 import { SectionCard } from '@/components/section-card';
 import { SkeletonBlock } from '@/components/skeleton-block';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Body, Heading, Label } from '@/components/ui/typography';
 import {
   getStrategies,
   runBacktest,
@@ -20,7 +24,6 @@ import {
   type StrategyMeta,
   type StrategyParameterDefinition,
 } from '@/lib/api';
-import { useAppTheme } from '@/lib/theme-context';
 
 type RangeOption = '1y' | '3y' | '5y';
 
@@ -62,7 +65,6 @@ function metricTone(value: number, kind: 'drawdown' | 'neutral' | 'return') {
 
 export default function StrategyScreen() {
   const { t } = useTranslation();
-  const { palette } = useAppTheme();
   const [strategies, setStrategies] = useState<StrategyMeta[]>([]);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(null);
   const [symbol, setSymbol] = useState('600519');
@@ -72,7 +74,6 @@ export default function StrategyScreen() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
 
   async function triggerSuccessHaptic() {
@@ -221,22 +222,22 @@ export default function StrategyScreen() {
 
           <View className="gap-3">
             {[0, 1].map((index) => (
-              <View
+              <Card
                 key={`strategy-skeleton-${index}`}
-                className="rounded-3xl border border-divider bg-surface/70 px-4 py-4"
-                style={{ borderCurve: 'continuous' }}>
+                className="border border-divider px-card-x py-row-y"
+                tone="raised">
                 <SkeletonBlock className="h-6 w-36 rounded-full" />
                 <SkeletonBlock className="mt-3 h-4 w-full rounded-full bg-background/70" />
                 <SkeletonBlock className="mt-2 h-4 w-5/6 rounded-full bg-background/70" />
                 <SkeletonBlock className="mt-4 h-4 w-24 rounded-full" />
-              </View>
+              </Card>
             ))}
           </View>
         </>
       ) : (
         <>
           <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
-            <Text className="text-sm leading-6 text-secondary">{t('strategy.subtitle')}</Text>
+            <Body tone="secondary">{t('strategy.subtitle')}</Body>
           </Animated.View>
 
           {error ? (
@@ -264,18 +265,22 @@ export default function StrategyScreen() {
                       name: strategyName,
                     })}
                     accessibilityRole="button"
-                    className={`rounded-3xl border px-4 py-4 active:opacity-80 ${
-                      selected ? 'border-accent bg-surface' : 'border-divider bg-surface/70'
+                    className={`rounded-card border active:opacity-80 ${
+                      selected ? 'border-accent' : 'border-divider'
                     }`}
                     onPress={() => selectStrategy(strategy)}
                     style={{ borderCurve: 'continuous' }}>
-                    <Text className="text-lg font-semibold text-primary">{strategyName}</Text>
-                    <Text className="mt-2 text-sm leading-6 text-secondary">
-                      {getStrategyDescription(strategy)}
-                    </Text>
-                    <Text className="mt-4 text-sm font-medium text-accent">
-                      {t('strategy.runBacktest')}
-                    </Text>
+                    <Card
+                      className="px-card-x py-row-y"
+                      tone={selected ? 'default' : 'raised'}>
+                      <Heading>{strategyName}</Heading>
+                      <Body className="mt-2" tone="secondary">
+                        {getStrategyDescription(strategy)}
+                      </Body>
+                      <Label className="mt-4" tone="accent">
+                        {t('strategy.runBacktest')}
+                      </Label>
+                    </Card>
                   </Pressable>
                 </Animated.View>
               );
@@ -285,16 +290,14 @@ export default function StrategyScreen() {
           {selectedStrategy ? (
             <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
               <SectionCard
-                bodyClassName="px-4 py-5"
+                bodyClassName="px-card-x py-card-y"
                 title={t('strategy.configureTitle', {
                   name: getStrategyName(selectedStrategy),
                 })}>
                 <View>
-                  <Text className="text-sm font-medium text-secondary">
-                    {t('strategy.symbolLabel')}
-                  </Text>
-                  <TextInput
-                    className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                  <Label tone="secondary">{t('strategy.symbolLabel')}</Label>
+                  <Input
+                    className="mt-2"
                     keyboardType="number-pad"
                     maxLength={6}
                     onChangeText={(value) => {
@@ -302,21 +305,12 @@ export default function StrategyScreen() {
                       setError(null);
                     }}
                     placeholder={t('strategy.symbolPlaceholder')}
-                    placeholderTextColor={placeholderColor}
-                    style={{
-                      borderCurve: 'continuous',
-                      fontSize: 16,
-                      lineHeight: undefined,
-                      paddingVertical: 14,
-                    }}
                     value={symbol}
                   />
                 </View>
 
                 <View className="mt-5">
-                  <Text className="text-sm font-medium text-secondary">
-                    {t('strategy.rangeLabel')}
-                  </Text>
+                  <Label tone="secondary">{t('strategy.rangeLabel')}</Label>
                   <PillSelector
                     className="mt-2"
                     onChange={(range) => {
@@ -332,45 +326,31 @@ export default function StrategyScreen() {
                 </View>
 
                 <View className="mt-5 gap-4">
-                  <Text className="text-sm font-medium text-secondary">
-                    {t('strategy.parametersLabel')}
-                  </Text>
+                  <Label tone="secondary">{t('strategy.parametersLabel')}</Label>
                   {selectedStrategy.parameters.map((definition) => (
                     <View key={definition.name}>
-                      <Text className="text-sm text-secondary">
+                      <Label tone="secondary">
                         {getParameterLabel(selectedStrategy.id, definition.name)}
-                      </Text>
-                      <TextInput
-                        className="mt-2 rounded-2xl border border-divider bg-background px-4 text-primary"
+                      </Label>
+                      <Input
+                        className="mt-2"
                         keyboardType="numeric"
                         onChangeText={(value) => updateParam(definition.name, value)}
-                        style={{
-                          borderCurve: 'continuous',
-                          fontSize: 16,
-                          lineHeight: undefined,
-                          paddingVertical: 14,
-                        }}
                         value={params[definition.name] ?? String(definition.default)}
                       />
                     </View>
                   ))}
                 </View>
 
-                <Pressable
+                <Button
                   accessibilityLabel={t('accessibility.strategy.runBacktest')}
-                  accessibilityRole="button"
-                  className={`mt-6 min-h-11 items-center justify-center rounded-2xl px-4 py-4 ${
-                    running ? 'bg-accent/70' : 'bg-accent active:opacity-80'
-                  }`}
-                  disabled={running}
+                  className="mt-6"
+                  loading={running}
                   onPress={() => {
                     void handleRunBacktest();
-                  }}
-                  style={{ borderCurve: 'continuous' }}>
-                  <Text className="text-base font-semibold text-primary">
-                    {running ? t('strategy.running') : t('strategy.run')}
-                  </Text>
-                </Pressable>
+                  }}>
+                  {running ? t('strategy.running') : t('strategy.run')}
+                </Button>
               </SectionCard>
             </Animated.View>
           ) : null}
@@ -379,55 +359,41 @@ export default function StrategyScreen() {
             <Animated.View
               entering={reducedMotion ? undefined : FadeIn.duration(240)}
               exiting={reducedMotion ? undefined : FadeOut.duration(180)}>
-              <SectionCard bodyClassName="px-4 py-5" title={t('strategy.resultsTitle')}>
+              <SectionCard bodyClassName="px-card-x py-card-y" title={t('strategy.resultsTitle')}>
                 <View className="flex-row flex-wrap justify-between gap-y-3">
-                  <View
-                    className="w-[48%] rounded-2xl bg-background px-4 py-4"
-                    style={{ borderCurve: 'continuous' }}>
-                    <Text className="text-sm text-secondary">
-                      {t('strategy.metrics.annualReturn')}
-                    </Text>
+                  <Card className="w-[48%] px-card-x py-row-y" tone="subtle">
+                    <Label tone="secondary">{t('strategy.metrics.annualReturn')}</Label>
                     <NumericText
-                      className="mt-2 text-xl font-semibold"
+                      className="mt-2 text-title font-semibold"
                       toneValue={metricTone(result.annual_return, 'return')}>
                       {formatPercent(result.annual_return)}
                     </NumericText>
-                  </View>
-                  <View
-                    className="w-[48%] rounded-2xl bg-background px-4 py-4"
-                    style={{ borderCurve: 'continuous' }}>
-                    <Text className="text-sm text-secondary">
-                      {t('strategy.metrics.maxDrawdown')}
-                    </Text>
+                  </Card>
+                  <Card className="w-[48%] px-card-x py-row-y" tone="subtle">
+                    <Label tone="secondary">{t('strategy.metrics.maxDrawdown')}</Label>
                     <NumericText
-                      className="mt-2 text-xl font-semibold"
+                      className="mt-2 text-title font-semibold"
                       toneValue={metricTone(result.max_drawdown, 'drawdown')}>
                       {formatPercent(result.max_drawdown)}
                     </NumericText>
-                  </View>
-                  <View
-                    className="w-[48%] rounded-2xl bg-background px-4 py-4"
-                    style={{ borderCurve: 'continuous' }}>
-                    <Text className="text-sm text-secondary">{t('strategy.metrics.winRate')}</Text>
-                    <NumericText className="mt-2 text-xl font-semibold text-primary">
+                  </Card>
+                  <Card className="w-[48%] px-card-x py-row-y" tone="subtle">
+                    <Label tone="secondary">{t('strategy.metrics.winRate')}</Label>
+                    <NumericText className="mt-2 text-title font-semibold text-primary">
                       {formatWinRate(result.win_rate)}
                     </NumericText>
-                  </View>
-                  <View
-                    className="w-[48%] rounded-2xl bg-background px-4 py-4"
-                    style={{ borderCurve: 'continuous' }}>
-                    <Text className="text-sm text-secondary">
-                      {t('strategy.metrics.sharpeRatio')}
-                    </Text>
-                    <NumericText className="mt-2 text-xl font-semibold text-primary">
+                  </Card>
+                  <Card className="w-[48%] px-card-x py-row-y" tone="subtle">
+                    <Label tone="secondary">{t('strategy.metrics.sharpeRatio')}</Label>
+                    <NumericText className="mt-2 text-title font-semibold text-primary">
                       {formatSharpe(result.sharpe_ratio)}
                     </NumericText>
-                  </View>
+                  </Card>
                 </View>
 
                 <View className="mt-4 flex-row items-center gap-2">
-                  <Text className="text-sm text-secondary">{t('strategy.metrics.totalTrades')}</Text>
-                  <NumericText className="text-base font-semibold text-primary">
+                  <Label tone="secondary">{t('strategy.metrics.totalTrades')}</Label>
+                  <NumericText className="text-body font-semibold text-primary">
                     {result.total_trades}
                   </NumericText>
                 </View>

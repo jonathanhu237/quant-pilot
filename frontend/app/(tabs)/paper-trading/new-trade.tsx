@@ -1,20 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { PillSelector } from '@/components/pill-selector';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/typography';
 import { TradeSide, useTradeSubmission } from '@/hooks/use-trade-submission';
-import { useAppTheme } from '@/lib/theme-context';
 
 export default function NewTradeSheet() {
   const { t } = useTranslation();
-  const { palette } = useAppTheme();
   const [tradeSide, setTradeSide] = useState<TradeSide>('buy');
   const [symbol, setSymbol] = useState('');
   const [shares, setShares] = useState('');
-  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
   const { sheetError, setSheetError, submitTrade, submitting } = useTradeSubmission({
     onSuccess: () => router.back(),
@@ -40,11 +40,8 @@ export default function NewTradeSheet() {
         />
 
         <View className="gap-2">
-          <Text className="text-sm font-medium text-secondary">
-            {t('paperTrading.tradeModal.symbol')}
-          </Text>
-          <TextInput
-            className="rounded-2xl border border-divider bg-background px-4 text-primary"
+          <Label tone="secondary">{t('paperTrading.tradeModal.symbol')}</Label>
+          <Input
             keyboardType="number-pad"
             maxLength={6}
             onChangeText={(value) => {
@@ -52,26 +49,19 @@ export default function NewTradeSheet() {
               setSheetError(null);
             }}
             placeholder={t('paperTrading.tradeModal.symbolPlaceholder')}
-            placeholderTextColor={placeholderColor}
-            style={{ borderCurve: 'continuous', fontSize: 16, lineHeight: undefined, paddingVertical: 14 }}
             value={symbol}
           />
         </View>
 
         <View className="gap-2">
-          <Text className="text-sm font-medium text-secondary">
-            {t('paperTrading.tradeModal.shares')}
-          </Text>
-          <TextInput
-            className="rounded-2xl border border-divider bg-background px-4 text-primary"
+          <Label tone="secondary">{t('paperTrading.tradeModal.shares')}</Label>
+          <Input
             keyboardType="number-pad"
             onChangeText={(value) => {
               setShares(value);
               setSheetError(null);
             }}
             placeholder={t('paperTrading.tradeModal.sharesPlaceholder')}
-            placeholderTextColor={placeholderColor}
-            style={{ borderCurve: 'continuous', fontSize: 16, lineHeight: undefined, paddingVertical: 14 }}
             value={shares}
           />
         </View>
@@ -88,31 +78,24 @@ export default function NewTradeSheet() {
       </View>
 
       <View className="flex-row gap-3 border-t border-divider px-5 pb-8 pt-4">
-        <Pressable
+        <Button
           accessibilityLabel={t('accessibility.paperTrading.cancelTrade')}
-          accessibilityRole="button"
-          className="min-h-11 flex-1 items-center justify-center rounded-xl border border-divider px-4 py-3 active:opacity-80"
+          className="flex-1"
           onPress={() => router.back()}
-          style={{ borderCurve: 'continuous' }}>
-          <Text className="font-medium text-secondary">{t('paperTrading.tradeModal.cancel')}</Text>
-        </Pressable>
-        <Pressable
+          variant="secondary">
+          {t('paperTrading.tradeModal.cancel')}
+        </Button>
+        <Button
           accessibilityLabel={submitAccessibilityLabel}
-          accessibilityRole="button"
-          className={`min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-3 ${
-            submitting ? 'bg-accent/70' : 'bg-accent active:opacity-80'
-          }`}
-          disabled={submitting}
+          className="flex-1"
+          loading={submitting}
           onPress={() => {
             void submitTrade();
-          }}
-          style={{ borderCurve: 'continuous' }}>
-          <Text className="font-medium text-primary">
-            {submitting
-              ? t('paperTrading.tradeModal.submitting')
-              : t(`paperTrading.tradeModal.confirm.${tradeSide}`)}
-          </Text>
-        </Pressable>
+          }}>
+          {submitting
+            ? t('paperTrading.tradeModal.submitting')
+            : t(`paperTrading.tradeModal.confirm.${tradeSide}`)}
+        </Button>
       </View>
     </View>
   );

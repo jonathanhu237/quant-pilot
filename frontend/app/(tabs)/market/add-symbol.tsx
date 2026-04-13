@@ -1,20 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Body } from '@/components/ui/typography';
 import { addToWatchlist } from '@/lib/api';
-import { useAppTheme } from '@/lib/theme-context';
 
 export default function AddSymbolSheet() {
   const { t } = useTranslation();
-  const { palette } = useAppTheme();
   const [newSymbol, setNewSymbol] = useState('');
   const [sheetError, setSheetError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
 
   async function triggerSuccessHaptic() {
@@ -48,9 +48,8 @@ export default function AddSymbolSheet() {
   return (
     <View className="flex-1 bg-surface">
       <View className="flex-1 gap-5 px-5 pt-4">
-        <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
-        <TextInput
-          className="rounded-2xl border border-divider bg-background px-4 text-primary"
+        <Body tone="secondary">{t('market.subtitle')}</Body>
+        <Input
           keyboardType="number-pad"
           maxLength={6}
           onChangeText={(value) => {
@@ -60,8 +59,6 @@ export default function AddSymbolSheet() {
             }
           }}
           placeholder={t('market.symbolPlaceholder')}
-          placeholderTextColor={placeholderColor}
-          style={{ borderCurve: 'continuous', fontSize: 16, lineHeight: undefined, paddingVertical: 14 }}
           value={newSymbol}
         />
         {sheetError ? (
@@ -76,29 +73,22 @@ export default function AddSymbolSheet() {
       </View>
 
       <View className="flex-row gap-3 border-t border-divider px-5 pb-8 pt-4">
-        <Pressable
+        <Button
           accessibilityLabel={t('accessibility.market.cancelAddSymbol')}
-          accessibilityRole="button"
-          className="min-h-11 flex-1 items-center justify-center rounded-xl border border-divider px-4 py-3 active:opacity-80"
+          className="flex-1"
           onPress={() => router.back()}
-          style={{ borderCurve: 'continuous' }}>
-          <Text className="font-medium text-secondary">{t('market.cancel')}</Text>
-        </Pressable>
-        <Pressable
+          variant="secondary">
+          {t('market.cancel')}
+        </Button>
+        <Button
           accessibilityLabel={t('accessibility.market.confirmAddSymbol')}
-          accessibilityRole="button"
-          className={`min-h-11 flex-1 items-center justify-center rounded-xl px-4 py-3 ${
-            submitting ? 'bg-accent/70' : 'bg-accent active:opacity-80'
-          }`}
-          disabled={submitting}
+          className="flex-1"
+          loading={submitting}
           onPress={() => {
             void handleAddSymbol();
-          }}
-          style={{ borderCurve: 'continuous' }}>
-          <Text className="font-medium text-primary">
-            {submitting ? t('market.adding') : t('market.add')}
-          </Text>
-        </Pressable>
+          }}>
+          {submitting ? t('market.adding') : t('market.add')}
+        </Button>
       </View>
     </View>
   );
