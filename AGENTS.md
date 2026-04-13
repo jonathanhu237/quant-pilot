@@ -4,8 +4,18 @@ This project uses a structured Claude + Codex collaboration loop. All participan
 
 ### Roles
 
-- **Claude:** planning, code review, committing
-- **Codex:** implementation, execution summary
+- **Claude:** planning, code review, simulator/device verification, committing
+- **Codex:** implementation, execution summary (terminal-only verification: tests, typecheck, lint)
+
+### Simulator verification
+
+Codex runs in a terminal-only environment and cannot drive a simulator or device. **Any verification that requires running the app on a simulator/device is Claude's responsibility, not Codex's.** This includes:
+
+- Tapping through new UI flows on iOS Simulator / Android Emulator
+- Visual/screenshot checks of styling, layout, theme, animation
+- Manual API smoke tests through the running app (not just curl)
+
+When a `PLAN.md` involves frontend changes, Codex completes the terminal-side verification (tests, typecheck, lint) and notes in `SUMMARY.md` that simulator verification is pending. Claude then performs the simulator verification as part of the review step (between `SUMMARY.md` and the commit), using the simulator MCP tools available in the Claude session. If Claude finds a runtime bug, treat it like any other review issue: write it into `REVIEW.md` and hand it back to Codex to fix.
 
 ### Parallelism
 
