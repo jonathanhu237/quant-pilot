@@ -1,14 +1,13 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAppTheme } from '@/lib/theme-context';
 
 export default function TabLayout() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useAppTheme();
 
   return (
     <Tabs

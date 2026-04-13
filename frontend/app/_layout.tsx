@@ -1,15 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router/stack';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
-import { colorScheme, useColorScheme } from 'nativewind';
+import { vars } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { LANGUAGE_STORAGE_KEY, normalizeLanguageTag } from '@/lib/i18n';
-import { getPreference, THEME_STORAGE_KEY } from '@/lib/preferences';
+import { getPreference, setPreference, THEME_STORAGE_KEY } from '@/lib/preferences';
+import { AppThemeProvider } from '@/lib/theme-context';
+import {
+  getThemePalette,
+  getThemeVariables,
+  getToggledThemeMode,
+  normalizeThemeMode,
+  type ThemeMode,
+} from '@/lib/theme';
 import '../global.css';
 
 export const unstable_settings = {
@@ -18,7 +25,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const { t } = useTranslation();
-  const { colorScheme: currentColorScheme } = useColorScheme();
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
@@ -33,11 +40,7 @@ export default function RootLayout() {
         }
 
         const storedTheme = await getPreference(THEME_STORAGE_KEY);
-        if (storedTheme === 'light' || storedTheme === 'dark') {
-          colorScheme.set(storedTheme);
-        } else {
-          colorScheme.set('dark');
-        }
+        setThemeModeState(normalizeThemeMode(storedTheme));
       } finally {
         setIsAppReady(true);
       }
@@ -47,34 +50,46 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const backgroundColor = currentColorScheme === 'light' ? '#F5F5F7' : '#0F0F14';
-    void SystemUI.setBackgroundColorAsync(backgroundColor);
-  }, [currentColorScheme]);
+    void SystemUI.setBackgroundColorAsync(getThemePalette(themeMode).background);
+  }, [themeMode]);
 
-  const isDark = currentColorScheme !== 'light';
-  const baseTheme = isDark ? DarkTheme : DefaultTheme;
-  const theme = {
-    ...baseTheme,
-    dark: isDark,
-    colors: {
-      ...baseTheme.colors,
-      primary: '#5E6AD2',
-      background: isDark ? '#0F0F14' : '#F5F5F7',
-      card: isDark ? '#0F0F14' : '#F5F5F7',
-      text: isDark ? '#FFFFFF' : '#0F0F14',
-      border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-      notification: '#FF4D4D',
-    },
-  };
+  function setThemeMode(nextTheme: ThemeMode) {
+    setThemeModeState(nextTheme);
+    void setPreference(THEME_STORAGE_KEY, nextTheme);
+  }
+
+  function toggleTheme() {
+    setThemeModeState((currentTheme) => {
+      const nextTheme = getToggledThemeMode(currentTheme);
+      void setPreference(THEME_STORAGE_KEY, nextTheme);
+      return nextTheme;
+    });
+  }
 
   if (!isAppReady) {
     return null;
   }
 
+  const isDark = themeMode === 'dark';
+  const palette = getThemePalette(themeMode);
+  const themeVars = vars(getThemeVariables(themeMode));
+
   return (
-    <View className={`flex-1 ${isDark ? 'dark' : ''}`}>
-      <ThemeProvider value={theme}>
-        <Stack>
+    <AppThemeProvider
+      value={{
+        isDark,
+        palette,
+        setThemeMode,
+        themeMode,
+        toggleTheme,
+      }}>
+      <View collapsable={false} style={[{ flex: 1 }, themeVars]}>
+        <Stack
+          screenOptions={{
+            contentStyle: {
+              backgroundColor: palette.background,
+            },
+          }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"
@@ -82,7 +97,7 @@ export default function RootLayout() {
           />
         </Stack>
         <StatusBar style={isDark ? 'light' : 'dark'} />
-      </ThemeProvider>
-    </View>
+      </View>
+    </AppThemeProvider>
   );
 }

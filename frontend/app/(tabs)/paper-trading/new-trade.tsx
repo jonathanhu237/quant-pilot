@@ -1,20 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { PillSelector } from '@/components/pill-selector';
 import { TradeSide, useTradeSubmission } from '@/hooks/use-trade-submission';
+import { useAppTheme } from '@/lib/theme-context';
 
 export default function NewTradeSheet() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
+  const { palette } = useAppTheme();
   const [tradeSide, setTradeSide] = useState<TradeSide>('buy');
   const [symbol, setSymbol] = useState('');
   const [shares, setShares] = useState('');
-  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
+  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
   const { sheetError, setSheetError, submitTrade, submitting } = useTradeSubmission({
     onSuccess: () => router.back(),

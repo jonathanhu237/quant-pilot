@@ -2,19 +2,19 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { addToWatchlist } from '@/lib/api';
+import { useAppTheme } from '@/lib/theme-context';
 
 export default function AddSymbolSheet() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
+  const { palette } = useAppTheme();
   const [newSymbol, setNewSymbol] = useState('');
   const [sheetError, setSheetError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
+  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
 
   async function triggerSuccessHaptic() {

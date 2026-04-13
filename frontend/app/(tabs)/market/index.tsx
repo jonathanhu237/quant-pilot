@@ -1,13 +1,11 @@
 import { memo, useCallback, useDeferredValue, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import {
-  FlatList,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
   View,
-  type ListRenderItemInfo,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
@@ -214,59 +212,8 @@ export default function MarketScreen() {
           );
         });
 
-  const renderItem = useCallback(
-    ({ index, item }: ListRenderItemInfo<MarketRowData>) => (
-      <MarketListRow
-        deleteAccessibilityLabel={t('accessibility.market.deleteSymbol', {
-          name: item.name,
-          symbol: item.symbol,
-        })}
-        deleteLabel={t('market.delete')}
-        index={index}
-        item={item}
-        onDelete={handleDeleteSymbol}
-        reducedMotion={reducedMotion}
-      />
-    ),
-    [handleDeleteSymbol, reducedMotion, t]
-  );
-
-  if (loading) {
-    return (
-      <ScrollView
-        className="flex-1 bg-background"
-        contentContainerStyle={{
-          gap: 0,
-          paddingBottom: 32,
-          paddingHorizontal: 20,
-          paddingTop: 8,
-        }}
-        contentInsetAdjustmentBehavior="automatic">
-        <View className="pb-6">
-          <SkeletonBlock className="h-4 w-48 rounded-full" />
-        </View>
-        {[0, 1, 2, 3, 4].map((index) => (
-          <View
-            key={`market-skeleton-${index}`}
-            className={`flex-row items-center gap-3 py-4 ${
-              index === 0 ? '' : 'border-t border-divider'
-            }`}>
-            <View className="flex-1 gap-2">
-              <SkeletonBlock className="h-4 w-28 rounded-full" />
-              <SkeletonBlock className="h-4 w-16 rounded-full" />
-            </View>
-            <View className="items-end gap-2">
-              <SkeletonBlock className="h-5 w-20 rounded-full" />
-              <SkeletonBlock className="h-4 w-16 rounded-full" />
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    );
-  }
-
   return (
-    <FlatList
+    <ScrollView
       className="flex-1 bg-background"
       contentContainerStyle={{
         flexGrow: 1,
@@ -275,36 +222,73 @@ export default function MarketScreen() {
         paddingTop: 8,
       }}
       contentInsetAdjustmentBehavior="automatic"
-      data={filteredRows}
-      keyExtractor={(item) => item.symbol}
-      ListEmptyComponent={
-        <View className="flex-1 items-center justify-center gap-2 px-6">
-          <Text className="text-xl font-semibold text-primary">{t('market.emptyTitle')}</Text>
-          <Text className="text-center text-sm leading-6 text-secondary">
-            {t('market.emptySubtitle')}
-          </Text>
-        </View>
-      }
-      ListHeaderComponent={
-        <View className="pb-6">
-          <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
-            <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
-          </Animated.View>
-          {error ? (
-            <Animated.Text
-              className="pt-4 text-sm text-error"
-              entering={reducedMotion ? undefined : FadeIn.duration(200)}
-              exiting={reducedMotion ? undefined : FadeOut.duration(160)}
-              selectable>
-              {error}
-            </Animated.Text>
-          ) : null}
-        </View>
-      }
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
-      }
-      renderItem={renderItem}
-    />
+      }>
+      {loading ? (
+        <>
+          <View className="pb-6">
+            <SkeletonBlock className="h-4 w-48 rounded-full" />
+          </View>
+          {[0, 1, 2, 3, 4].map((index) => (
+            <View
+              key={`market-skeleton-${index}`}
+              className={`flex-row items-center gap-3 py-4 ${
+                index === 0 ? '' : 'border-t border-divider'
+              }`}>
+              <View className="flex-1 gap-2">
+                <SkeletonBlock className="h-4 w-28 rounded-full" />
+                <SkeletonBlock className="h-4 w-16 rounded-full" />
+              </View>
+              <View className="items-end gap-2">
+                <SkeletonBlock className="h-5 w-20 rounded-full" />
+                <SkeletonBlock className="h-4 w-16 rounded-full" />
+              </View>
+            </View>
+          ))}
+        </>
+      ) : (
+        <>
+          <View className="pb-6">
+            <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
+              <Text className="text-sm leading-6 text-secondary">{t('market.subtitle')}</Text>
+            </Animated.View>
+            {error ? (
+              <Animated.Text
+                className="pt-4 text-sm text-error"
+                entering={reducedMotion ? undefined : FadeIn.duration(200)}
+                exiting={reducedMotion ? undefined : FadeOut.duration(160)}
+                selectable>
+                {error}
+              </Animated.Text>
+            ) : null}
+          </View>
+
+          {filteredRows.length === 0 ? (
+            <View className="flex-1 items-center justify-center gap-2 px-6">
+              <Text className="text-xl font-semibold text-primary">{t('market.emptyTitle')}</Text>
+              <Text className="text-center text-sm leading-6 text-secondary">
+                {t('market.emptySubtitle')}
+              </Text>
+            </View>
+          ) : (
+            filteredRows.map((item, index) => (
+              <MarketListRow
+                deleteAccessibilityLabel={t('accessibility.market.deleteSymbol', {
+                  name: item.name,
+                  symbol: item.symbol,
+                })}
+                deleteLabel={t('market.delete')}
+                index={index}
+                item={item}
+                key={item.symbol}
+                onDelete={handleDeleteSymbol}
+                reducedMotion={reducedMotion}
+              />
+            ))
+          )}
+        </>
+      )}
+    </ScrollView>
   );
 }

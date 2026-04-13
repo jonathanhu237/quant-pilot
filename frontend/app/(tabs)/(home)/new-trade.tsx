@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
 import { PillSelector } from '@/components/pill-selector';
 import { TradeSide, useTradeSubmission } from '@/hooks/use-trade-submission';
+import { useAppTheme } from '@/lib/theme-context';
 
 type TradeSheetParams = {
   price?: string | string[];
@@ -41,13 +41,13 @@ function formatSignalDate(signalDate: string) {
 
 export default function HomeSignalTradeSheet() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
+  const { palette } = useAppTheme();
   const params = useLocalSearchParams() as TradeSheetParams;
   const [tradeSide, setTradeSide] = useState<TradeSide>(
     getSingleParam(params.side) === 'sell' ? 'sell' : 'buy'
   );
   const [shares, setShares] = useState('100');
-  const placeholderColor = colorScheme === 'light' ? '#6B6B7E' : '#8B8B9E';
+  const placeholderColor = palette.placeholder;
   const reducedMotion = useReducedMotion();
   const symbol = getSingleParam(params.symbol);
   const strategyId = getSingleParam(params.strategyId);

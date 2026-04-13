@@ -27,6 +27,7 @@ import {
   type DashboardWatchlistQuote,
   type SymbolSignalSnapshot,
 } from '@/lib/api';
+import { HOME_NEW_TRADE_ROUTE, HOME_SIGNAL_HISTORY_ROUTE } from '@/lib/routes';
 
 function formatCurrency(value: number) {
   return `¥${value.toLocaleString('en-US', {
@@ -146,7 +147,7 @@ const SignalRow = memo(function SignalRow({
             stockName: symbolSignal.name,
             symbol: symbolSignal.symbol,
           },
-          pathname: './signal-history',
+          pathname: HOME_SIGNAL_HISTORY_ROUTE,
         }}
         asChild>
         <Pressable
@@ -206,7 +207,7 @@ const SignalRow = memo(function SignalRow({
                     strategyName,
                     symbol: symbolSignal.symbol,
                   },
-                  pathname: './new-trade',
+                  pathname: HOME_NEW_TRADE_ROUTE,
                 }}
                 key={`${symbolSignal.symbol}-${signal.strategy_id}`}
                 asChild>
@@ -351,109 +352,6 @@ export default function HomeScreen() {
     }
   }
 
-  if (loading) {
-    return (
-      <ScrollView
-        className="flex-1 bg-background"
-        contentContainerStyle={{
-          gap: 24,
-          paddingBottom: 32,
-          paddingHorizontal: 20,
-          paddingTop: 8,
-        }}
-        contentInsetAdjustmentBehavior="automatic">
-        <SkeletonBlock className="h-4 w-56 rounded-full" />
-
-        <View className="gap-4 rounded-3xl bg-surface px-4 py-5" style={{ borderCurve: 'continuous' }}>
-          <View className="flex-row items-start justify-between gap-4">
-            <View className="flex-1 gap-3">
-              <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
-              <SkeletonBlock className="h-10 w-44 rounded-2xl bg-background/70" />
-            </View>
-            <SkeletonBlock className="mt-1 h-6 w-20 rounded-full bg-background/70" />
-          </View>
-          <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
-        </View>
-
-        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
-          <View className="gap-2 px-4 pt-5">
-            <SkeletonBlock className="h-6 w-36 rounded-full bg-background/70" />
-            <SkeletonBlock className="h-4 w-60 rounded-full bg-background/70" />
-          </View>
-          <View className="pb-1">
-            {[0, 1, 2].map((index) => (
-              <View
-                key={`signal-skeleton-${index}`}
-                className={`flex-row items-start justify-between px-4 py-4 ${
-                  index === 0 ? '' : 'border-t border-divider'
-                }`}>
-                <View className="flex-1 gap-2 pr-4">
-                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
-                </View>
-                <View className="items-end gap-2">
-                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-6 w-28 rounded-full bg-background/70" />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
-          <View className="gap-2 px-4 pt-5">
-            <SkeletonBlock className="h-6 w-40 rounded-full bg-background/70" />
-            <SkeletonBlock className="h-4 w-52 rounded-full bg-background/70" />
-          </View>
-          <View className="pb-1">
-            {[0, 1, 2].map((index) => (
-              <View
-                key={`trade-skeleton-${index}`}
-                className={`flex-row items-start justify-between px-4 py-4 ${
-                  index === 0 ? '' : 'border-t border-divider'
-                }`}>
-                <View className="flex-1 gap-2 pr-4">
-                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
-                </View>
-                <View className="items-end gap-2">
-                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
-          <View className="gap-2 px-4 pt-5">
-            <SkeletonBlock className="h-6 w-44 rounded-full bg-background/70" />
-            <SkeletonBlock className="h-4 w-56 rounded-full bg-background/70" />
-          </View>
-          <View className="pb-1">
-            {[0, 1, 2].map((index) => (
-              <View
-                key={`quote-skeleton-${index}`}
-                className={`flex-row items-center justify-between px-4 py-4 ${
-                  index === 0 ? '' : 'border-t border-divider'
-                }`}>
-                <View className="flex-1 gap-2 pr-4">
-                  <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
-                </View>
-                <View className="items-end gap-2">
-                  <SkeletonBlock className="h-5 w-20 rounded-full bg-background/70" />
-                  <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-    );
-  }
-
   const signalSection = (
     <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(80)}>
       <SectionCard subtitle={t('home.signals.subtitle')} title={t('home.signals.title')}>
@@ -512,101 +410,195 @@ export default function HomeScreen() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#5E6AD2" />
       }>
-      <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
-        <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>
-      </Animated.View>
+      {loading ? (
+        <>
+          <SkeletonBlock className="h-4 w-56 rounded-full" />
 
-      {error ? (
-        <Animated.Text
-          className="text-sm text-error"
-          entering={reducedMotion ? undefined : FadeIn.duration(200)}
-          exiting={reducedMotion ? undefined : FadeOut.duration(160)}
-          selectable>
-          {error}
-        </Animated.Text>
-      ) : null}
+          <View className="gap-4 rounded-3xl bg-surface px-4 py-5" style={{ borderCurve: 'continuous' }}>
+            <View className="flex-row items-start justify-between gap-4">
+              <View className="flex-1 gap-3">
+                <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                <SkeletonBlock className="h-10 w-44 rounded-2xl bg-background/70" />
+              </View>
+              <SkeletonBlock className="mt-1 h-6 w-20 rounded-full bg-background/70" />
+            </View>
+            <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+          </View>
 
-      {dashboard ? (
-        <Animated.View
-          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
-          <Link href="/paper-trading" asChild>
-            <Pressable
-              accessibilityLabel={t('accessibility.home.openPaperTrading')}
-              accessibilityRole="button"
-              className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
-              style={{ borderCurve: 'continuous' }}>
-              <View className="flex-row items-start justify-between gap-4">
-                <View className="flex-1 gap-2">
-                  <Text className="text-sm text-secondary">{t('home.account.title')}</Text>
-                  <NumericText className="text-3xl font-bold text-primary">
-                    {formatCurrency(dashboard.account_summary.total_assets)}
-                  </NumericText>
+          <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+            <View className="gap-2 px-4 pt-5">
+              <SkeletonBlock className="h-6 w-36 rounded-full bg-background/70" />
+              <SkeletonBlock className="h-4 w-60 rounded-full bg-background/70" />
+            </View>
+            <View className="pb-1">
+              {[0, 1, 2].map((index) => (
+                <View
+                  key={`signal-skeleton-${index}`}
+                  className={`flex-row items-start justify-between px-4 py-4 ${
+                    index === 0 ? '' : 'border-t border-divider'
+                  }`}>
+                  <View className="flex-1 gap-2 pr-4">
+                    <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                  </View>
+                  <View className="items-end gap-2">
+                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-6 w-28 rounded-full bg-background/70" />
+                  </View>
                 </View>
-                <NumericText
-                  className="text-base font-semibold"
-                  toneValue={dashboard.account_summary.total_return_rate}>
-                  {formatPercent(dashboard.account_summary.total_return_rate)}
-                </NumericText>
-              </View>
-              <Text className="text-sm font-medium text-accent">{t('home.account.cta')}</Text>
-            </Pressable>
-          </Link>
-        </Animated.View>
-      ) : null}
+              ))}
+            </View>
+          </View>
 
-      {signalSection}
+          <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+            <View className="gap-2 px-4 pt-5">
+              <SkeletonBlock className="h-6 w-40 rounded-full bg-background/70" />
+              <SkeletonBlock className="h-4 w-52 rounded-full bg-background/70" />
+            </View>
+            <View className="pb-1">
+              {[0, 1, 2].map((index) => (
+                <View
+                  key={`trade-skeleton-${index}`}
+                  className={`flex-row items-start justify-between px-4 py-4 ${
+                    index === 0 ? '' : 'border-t border-divider'
+                  }`}>
+                  <View className="flex-1 gap-2 pr-4">
+                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-28 rounded-full bg-background/70" />
+                  </View>
+                  <View className="items-end gap-2">
+                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-24 rounded-full bg-background/70" />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
 
-      {dashboard ? (
-        <Animated.View
-          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(120)}>
-          <SectionCard
-            subtitle={t('home.recentTrades.subtitle')}
-            title={t('home.recentTrades.title')}>
-            {dashboard.recent_trades.length === 0 ? (
-              <View className="px-4 py-8">
-                <Text className="text-center text-base text-secondary">
-                  {t('home.recentTrades.empty')}
-                </Text>
-              </View>
-            ) : (
-              dashboard.recent_trades.map((trade, index) => (
-                <TradeRow
-                  key={trade.id}
-                  index={index}
-                  reducedMotion={reducedMotion}
-                  sharesUnitLabel={t('paperTrading.sharesUnit')}
-                  sideLabel={t(`paperTrading.tradeSide.${trade.side}`)}
-                  trade={trade}
-                />
-              ))
-            )}
-          </SectionCard>
-        </Animated.View>
-      ) : null}
+          <View className="rounded-3xl bg-surface" style={{ borderCurve: 'continuous' }}>
+            <View className="gap-2 px-4 pt-5">
+              <SkeletonBlock className="h-6 w-44 rounded-full bg-background/70" />
+              <SkeletonBlock className="h-4 w-56 rounded-full bg-background/70" />
+            </View>
+            <View className="pb-1">
+              {[0, 1, 2].map((index) => (
+                <View
+                  key={`quote-skeleton-${index}`}
+                  className={`flex-row items-center justify-between px-4 py-4 ${
+                    index === 0 ? '' : 'border-t border-divider'
+                  }`}>
+                  <View className="flex-1 gap-2 pr-4">
+                    <SkeletonBlock className="h-4 w-32 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-20 rounded-full bg-background/70" />
+                  </View>
+                  <View className="items-end gap-2">
+                    <SkeletonBlock className="h-5 w-20 rounded-full bg-background/70" />
+                    <SkeletonBlock className="h-4 w-16 rounded-full bg-background/70" />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </>
+      ) : (
+        <>
+          <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(220)}>
+            <Text className="text-sm leading-6 text-secondary">{t('home.subtitle')}</Text>
+          </Animated.View>
 
-      {dashboard ? (
-        <Animated.View
-          entering={reducedMotion ? undefined : FadeIn.duration(240).delay(160)}>
-          <SectionCard subtitle={t('home.watchlist.subtitle')} title={t('home.watchlist.title')}>
-            {dashboard.watchlist_quotes.length === 0 ? (
-              <View className="px-4 py-8">
-                <Text className="text-center text-base text-secondary">
-                  {t('home.watchlist.empty')}
-                </Text>
-              </View>
-            ) : (
-              dashboard.watchlist_quotes.map((quote, index) => (
-                <QuoteRow
-                  key={quote.symbol}
-                  index={index}
-                  quote={quote}
-                  reducedMotion={reducedMotion}
-                />
-              ))
-            )}
-          </SectionCard>
-        </Animated.View>
-      ) : null}
+          {error ? (
+            <Animated.Text
+              className="text-sm text-error"
+              entering={reducedMotion ? undefined : FadeIn.duration(200)}
+              exiting={reducedMotion ? undefined : FadeOut.duration(160)}
+              selectable>
+              {error}
+            </Animated.Text>
+          ) : null}
+
+          {dashboard ? (
+            <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(40)}>
+              <Link href="/paper-trading" asChild>
+                <Pressable
+                  accessibilityLabel={t('accessibility.home.openPaperTrading')}
+                  accessibilityRole="button"
+                  className="gap-4 rounded-3xl bg-surface px-4 py-5 active:opacity-80"
+                  style={{ borderCurve: 'continuous' }}>
+                  <View className="flex-row items-start justify-between gap-4">
+                    <View className="flex-1 gap-2">
+                      <Text className="text-sm text-secondary">{t('home.account.title')}</Text>
+                      <NumericText className="text-3xl font-bold text-primary">
+                        {formatCurrency(dashboard.account_summary.total_assets)}
+                      </NumericText>
+                    </View>
+                    <NumericText
+                      className="text-base font-semibold"
+                      toneValue={dashboard.account_summary.total_return_rate}>
+                      {formatPercent(dashboard.account_summary.total_return_rate)}
+                    </NumericText>
+                  </View>
+                  <Text className="text-sm font-medium text-accent">{t('home.account.cta')}</Text>
+                </Pressable>
+              </Link>
+            </Animated.View>
+          ) : null}
+
+          {signalSection}
+
+          {dashboard ? (
+            <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(120)}>
+              <SectionCard
+                subtitle={t('home.recentTrades.subtitle')}
+                title={t('home.recentTrades.title')}>
+                {dashboard.recent_trades.length === 0 ? (
+                  <View className="px-4 py-8">
+                    <Text className="text-center text-base text-secondary">
+                      {t('home.recentTrades.empty')}
+                    </Text>
+                  </View>
+                ) : (
+                  dashboard.recent_trades.map((trade, index) => (
+                    <TradeRow
+                      key={trade.id}
+                      index={index}
+                      reducedMotion={reducedMotion}
+                      sharesUnitLabel={t('paperTrading.sharesUnit')}
+                      sideLabel={t(`paperTrading.tradeSide.${trade.side}`)}
+                      trade={trade}
+                    />
+                  ))
+                )}
+              </SectionCard>
+            </Animated.View>
+          ) : null}
+
+          {dashboard ? (
+            <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(240).delay(160)}>
+              <SectionCard
+                subtitle={t('home.watchlist.subtitle')}
+                title={t('home.watchlist.title')}>
+                {dashboard.watchlist_quotes.length === 0 ? (
+                  <View className="px-4 py-8">
+                    <Text className="text-center text-base text-secondary">
+                      {t('home.watchlist.empty')}
+                    </Text>
+                  </View>
+                ) : (
+                  dashboard.watchlist_quotes.map((quote, index) => (
+                    <QuoteRow
+                      key={quote.symbol}
+                      index={index}
+                      quote={quote}
+                      reducedMotion={reducedMotion}
+                    />
+                  ))
+                )}
+              </SectionCard>
+            </Animated.View>
+          ) : null}
+        </>
+      )}
     </ScrollView>
   );
 }

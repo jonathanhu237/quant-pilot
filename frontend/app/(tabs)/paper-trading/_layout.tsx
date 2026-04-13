@@ -1,24 +1,23 @@
 import { Link } from 'expo-router';
 import { Pressable, Text } from 'react-native';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { Stack } from 'expo-router/stack';
 
 import { getThemedSheetOptions, getThemedStackOptions } from '@/lib/navigation';
+import { PAPER_TRADING_NEW_TRADE_ROUTE } from '@/lib/routes';
+import { useAppTheme } from '@/lib/theme-context';
 
 export default function PaperTradingStackLayout() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useAppTheme();
 
   return (
-    <Stack screenOptions={getThemedStackOptions(isDark)}>
+    <Stack screenOptions={getThemedStackOptions(isDark, true)}>
       <Stack.Screen
         name="index"
         options={{
-          headerLargeTitle: true,
           headerRight: () => (
-            <Link href="./new-trade" asChild>
+            <Link href={PAPER_TRADING_NEW_TRADE_ROUTE} asChild>
               <Pressable
                 accessibilityLabel={t('accessibility.paperTrading.openTradeSheet')}
                 accessibilityRole="button"

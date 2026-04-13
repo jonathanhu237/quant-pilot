@@ -1,26 +1,25 @@
 import { Link } from 'expo-router';
 import { Pressable } from 'react-native';
-import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
 import { Stack } from 'expo-router/stack';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { setMarketSearchQuery } from '@/lib/market-search';
 import { getThemedSheetOptions, getThemedStackOptions } from '@/lib/navigation';
+import { MARKET_ADD_SYMBOL_ROUTE } from '@/lib/routes';
+import { useAppTheme } from '@/lib/theme-context';
 
 export default function MarketStackLayout() {
   const { t } = useTranslation();
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const { isDark } = useAppTheme();
 
   return (
-    <Stack screenOptions={getThemedStackOptions(isDark)}>
+    <Stack screenOptions={getThemedStackOptions(isDark, true)}>
       <Stack.Screen
         name="index"
         options={{
-          headerLargeTitle: true,
           headerRight: () => (
-            <Link href="./add-symbol" asChild>
+            <Link href={MARKET_ADD_SYMBOL_ROUTE} asChild>
               <Pressable
                 accessibilityLabel={t('accessibility.market.addSymbol')}
                 accessibilityRole="button"

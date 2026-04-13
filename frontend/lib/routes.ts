@@ -1,0 +1,4 @@
+export const MARKET_ADD_SYMBOL_ROUTE = '/(tabs)/market/add-symbol' as const;
+export const PAPER_TRADING_NEW_TRADE_ROUTE = '/(tabs)/paper-trading/new-trade' as const;
+export const HOME_SIGNAL_HISTORY_ROUTE = '/(tabs)/(home)/signal-history' as const;
+export const HOME_NEW_TRADE_ROUTE = '/(tabs)/(home)/new-trade' as const;
