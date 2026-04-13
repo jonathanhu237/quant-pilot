@@ -126,12 +126,16 @@ const SignalRow = memo(function SignalRow({
   symbolSignal: SymbolSignalSnapshot;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
-  function getSignalToneClasses(signal: 'buy' | 'sell' | 'hold') {
+  function getSignalPillClasses(signal: 'buy' | 'sell' | 'hold') {
     return signal === 'buy'
-      ? 'border-up/30 bg-up/10 text-up'
+      ? 'border-up/30 bg-up/10'
       : signal === 'sell'
-        ? 'border-down/30 bg-down/10 text-down'
-        : 'border-divider bg-background/60 text-secondary';
+        ? 'border-down/30 bg-down/10'
+        : 'border-primary/30 bg-primary/20';
+  }
+
+  function getSignalTextClasses(signal: 'buy' | 'sell' | 'hold') {
+    return signal === 'buy' ? 'text-up' : signal === 'sell' ? 'text-down' : 'text-primary';
   }
 
   return (
@@ -188,8 +192,9 @@ const SignalRow = memo(function SignalRow({
               return (
                 <View
                   key={`${symbolSignal.symbol}-${signal.strategy_id}`}
-                  className={`rounded-full border px-2 py-1 ${getSignalToneClasses(signal.signal)}`}>
-                  <Text className="text-[11px] font-medium leading-4">
+                  className={`rounded-full border px-2 py-1 ${getSignalPillClasses(signal.signal)}`}>
+                  <Text
+                    className={`text-xs font-semibold leading-4 ${getSignalTextClasses(signal.signal)}`}>
                     {strategyName} · {signalLabel}
                   </Text>
                 </View>
@@ -214,10 +219,11 @@ const SignalRow = memo(function SignalRow({
                 <Pressable
                   accessibilityLabel={tradeAccessibilityLabel}
                   accessibilityRole="button"
-                  className={`rounded-full border px-2 py-1 active:opacity-80 ${getSignalToneClasses(signal.signal)}`}
+                  className={`rounded-full border px-2 py-1 active:opacity-80 ${getSignalPillClasses(signal.signal)}`}
                   hitSlop={4}
                   style={{ borderCurve: 'continuous' }}>
-                  <Text className="text-[11px] font-medium leading-4">
+                  <Text
+                    className={`text-xs font-semibold leading-4 ${getSignalTextClasses(signal.signal)}`}>
                     {strategyName} · {signalLabel}
                   </Text>
                 </Pressable>
