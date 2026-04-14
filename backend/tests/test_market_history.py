@@ -81,6 +81,45 @@ def test_get_market_history_returns_expected_shape_for_each_range(
     assert response.basic_info.low == pytest.approx(101.0)
 
 
+def test_get_market_history_returns_signals_for_every_registered_strategy(
+    monkeypatch: pytest.MonkeyPatch,
+    stub_quote_snapshot: None,
+) -> None:
+    monkeypatch.setattr(market_history, "fetch_kline_page", lambda *_args: make_kline_rows())
+
+    response = market_history.get_market_history("600519", "1M")
+
+    expected_strategy_ids = set(market_history.STRATEGY_REGISTRY.keys())
+    assert set(response.signals.keys()) == expected_strategy_ids
+    for series in response.signals.values():
+        assert len(series) == len(response.bars)
+        assert all(value in {-1, 0, 1} for value in series)
+
+
+def test_get_market_history_signals_fall_back_to_zero_when_strategy_raises(
+    monkeypatch: pytest.MonkeyPatch,
+    stub_quote_snapshot: None,
+) -> None:
+    monkeypatch.setattr(market_history, "fetch_kline_page", lambda *_args: make_kline_rows())
+
+    class ExplodingStrategy:
+        def __init__(self, *_args, **_kwargs) -> None:
+            pass
+
+        def generate_signals(self, _data):
+            raise RuntimeError("boom")
+
+    fake_registry = {**market_history.STRATEGY_REGISTRY, "boom": ExplodingStrategy}
+    monkeypatch.setattr(market_history, "STRATEGY_REGISTRY", fake_registry)
+
+    response = market_history.get_market_history("600519", "1M")
+
+    assert "boom" in response.signals
+    assert response.signals["boom"] == [0] * len(response.bars)
+    for strategy_id in market_history.STRATEGY_REGISTRY:
+        assert strategy_id in response.signals
+
+
 def test_get_market_history_aligns_ma_with_leading_none(
     monkeypatch: pytest.MonkeyPatch,
     stub_quote_snapshot: None,

@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import date, timedelta
 
+import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +26,30 @@ def _is_supported_symbol(symbol: str) -> bool:
 
 def _map_signal(value: int) -> str:
     return SIGNAL_MAP.get(value, "hold")
+
+
+def generate_signal_series_for_history(
+    historical_data: pd.DataFrame,
+    strategies: dict[str, type[BaseStrategy]],
+) -> dict[str, list[int]]:
+    series_by_strategy: dict[str, list[int]] = {}
+    row_count = len(historical_data)
+
+    for strategy_id, strategy_class in strategies.items():
+        try:
+            strategy = strategy_class()
+            signals = strategy.generate_signals(historical_data)
+            normalized = signals.reindex(historical_data.index).fillna(0).astype(int)
+            series_by_strategy[strategy_id] = [int(value) for value in normalized.tolist()]
+        except Exception:
+            logger.warning(
+                "Failed to generate signal series for strategy %s",
+                strategy_id,
+                exc_info=True,
+            )
+            series_by_strategy[strategy_id] = [0] * row_count
+
+    return series_by_strategy
 
 
 def generate_signals_for_symbol(

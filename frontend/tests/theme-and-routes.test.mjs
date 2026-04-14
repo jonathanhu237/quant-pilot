@@ -293,6 +293,15 @@ test('market detail screen uses pill range selection and wagmi charts with 1M de
   assert.match(sourceText, /useState<KlineRange>\('1M'\)/);
 });
 
+test('market detail screen overlays strategy signals via svg polygons', () => {
+  const sourceText = readFileSync(new URL('../app/(tabs)/market/[symbol].tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /from 'react-native-svg'/);
+  assert.match(sourceText, /signalMarkers/);
+  assert.match(sourceText, /market\.detail\.signalOverlay\.label/);
+  assert.match(sourceText, /<Polygon/);
+});
+
 test('strategy detail route pattern and helper are exported', () => {
   assert.equal(STRATEGY_DETAIL_ROUTE_PATTERN, '/(tabs)/strategy/[id]');
   assert.equal(typeof getStrategyDetailRoute, 'function');

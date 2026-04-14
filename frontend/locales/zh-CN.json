@@ -119,6 +119,10 @@
         "threeMonths": "3个月"
       },
       "retry": "重试",
+      "signalOverlay": {
+        "label": "策略信号",
+        "none": "关闭"
+      },
       "stats": {
         "high": "最高",
         "low": "最低",

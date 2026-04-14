@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { startTransition, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Svg, { Polygon } from 'react-native-svg';
 import { CandlestickChart, LineChart } from 'react-native-wagmi-charts';
 
 import { NumericText } from '@/components/numeric-text';
@@ -29,6 +30,9 @@ const RSI_CHART_HEIGHT = 160;
 const UP_COLOR = '#FF4D4D';
 const DOWN_COLOR = '#00C48C';
 const RANGE_OPTIONS: KlineRange[] = ['1M', '3M', '6M', '1Y', 'ALL'];
+const SIGNAL_OVERLAY_NONE = 'none';
+const SIGNAL_MARKER_SIZE = 10;
+const SIGNAL_MARKER_GAP = 6;
 
 type BasicInfoRow = {
   label: string;
@@ -82,6 +86,7 @@ export default function MarketDetailScreen() {
   const [reloadToken, setReloadToken] = useState(0);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [selectedOverlay, setSelectedOverlay] = useState<string>(SIGNAL_OVERLAY_NONE);
 
   useEffect(() => {
     let active = true;
@@ -216,6 +221,55 @@ export default function MarketDetailScreen() {
       min: min * 0.99,
     };
   }, [kline]);
+
+  const overlayOptions = useMemo(() => {
+    const strategyIds = kline ? Object.keys(kline.signals) : [];
+    return [
+      { label: t('market.detail.signalOverlay.none'), value: SIGNAL_OVERLAY_NONE },
+      ...strategyIds.map((strategyId) => ({
+        label: t(`strategy.strategies.${strategyId}.name`, { defaultValue: strategyId }),
+        value: strategyId,
+      })),
+    ];
+  }, [kline, t]);
+
+  const signalMarkers = useMemo(() => {
+    if (!kline || selectedOverlay === SIGNAL_OVERLAY_NONE) {
+      return [] as { cx: number; cy: number; kind: 'buy' | 'sell' }[];
+    }
+
+    const series = kline.signals[selectedOverlay];
+    if (!series || series.length === 0 || kline.bars.length < 2) {
+      return [];
+    }
+
+    const firstTimestamp = toTimestamp(kline.bars[0].date);
+    const lastTimestamp = toTimestamp(kline.bars[kline.bars.length - 1].date);
+    const timeSpan = lastTimestamp - firstTimestamp;
+    const priceSpan = candleYRange.max - candleYRange.min;
+
+    if (timeSpan <= 0 || priceSpan <= 0) {
+      return [];
+    }
+
+    return kline.bars.flatMap((bar, index) => {
+      const signal = series[index];
+      if (signal !== 1 && signal !== -1) {
+        return [];
+      }
+
+      const timestamp = toTimestamp(bar.date);
+      const cx = ((timestamp - firstTimestamp) / timeSpan) * chartWidth;
+      const priceAnchor = signal === 1 ? bar.low : bar.high;
+      const priceCy =
+        ((candleYRange.max - priceAnchor) / priceSpan) * MAIN_CHART_HEIGHT;
+      const cy =
+        signal === 1
+          ? Math.min(priceCy + SIGNAL_MARKER_GAP, MAIN_CHART_HEIGHT - SIGNAL_MARKER_SIZE)
+          : Math.max(priceCy - SIGNAL_MARKER_GAP, SIGNAL_MARKER_SIZE);
+      return [{ cx, cy, kind: signal === 1 ? ('buy' as const) : ('sell' as const) }];
+    });
+  }, [candleYRange, chartWidth, kline, selectedOverlay]);
 
   const basicInfoRows = useMemo<BasicInfoRow[]>(
     () => [
@@ -398,6 +452,21 @@ export default function MarketDetailScreen() {
                   <Caption tone="secondary">{t('market.detail.legend.ma60')}</Caption>
                 </View>
 
+                {overlayOptions.length > 1 ? (
+                  <View className="gap-2">
+                    <Caption tone="secondary">
+                      {t('market.detail.signalOverlay.label')}
+                    </Caption>
+                    <PillSelector
+                      onChange={(value) => {
+                        setSelectedOverlay(value);
+                      }}
+                      options={overlayOptions}
+                      selectedValue={selectedOverlay}
+                    />
+                  </View>
+                ) : null}
+
                 <View className="overflow-hidden rounded-card bg-background/70">
                   <View style={{ height: MAIN_CHART_HEIGHT, width: chartWidth }}>
                     <CandlestickChart.Provider data={candleData}>
@@ -450,6 +519,28 @@ export default function MarketDetailScreen() {
                           <LineChart.Path color={palette.primary} width={2} />
                         </LineChart>
                       </LineChart.Provider>
+                    ) : null}
+                    {signalMarkers.length > 0 ? (
+                      <Svg
+                        height={MAIN_CHART_HEIGHT}
+                        pointerEvents="none"
+                        style={{ left: 0, position: 'absolute', top: 0 }}
+                        width={chartWidth}>
+                        {signalMarkers.map((marker, index) => {
+                          const half = SIGNAL_MARKER_SIZE / 2;
+                          const points =
+                            marker.kind === 'buy'
+                              ? `${marker.cx},${marker.cy} ${marker.cx - half},${marker.cy + SIGNAL_MARKER_SIZE} ${marker.cx + half},${marker.cy + SIGNAL_MARKER_SIZE}`
+                              : `${marker.cx},${marker.cy} ${marker.cx - half},${marker.cy - SIGNAL_MARKER_SIZE} ${marker.cx + half},${marker.cy - SIGNAL_MARKER_SIZE}`;
+                          return (
+                            <Polygon
+                              fill={marker.kind === 'buy' ? UP_COLOR : DOWN_COLOR}
+                              key={`signal-marker-${index}`}
+                              points={points}
+                            />
+                          );
+                        })}
+                      </Svg>
                     ) : null}
                   </View>
                 </View>

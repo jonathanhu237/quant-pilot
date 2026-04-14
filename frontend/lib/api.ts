@@ -33,6 +33,7 @@ export type KlineResponse = {
   ma20: Array<number | null>;
   ma60: Array<number | null>;
   rsi14: Array<number | null>;
+  signals: Record<string, number[]>;
   basic_info: KlineBasicInfo;
 };
 

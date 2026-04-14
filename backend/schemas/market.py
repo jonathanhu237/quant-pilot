@@ -38,4 +38,5 @@ class KlineResponse(BaseModel):
     ma20: list[float | None]
     ma60: list[float | None]
     rsi14: list[float | None]
+    signals: dict[str, list[int]]
     basic_info: KlineBasicInfo

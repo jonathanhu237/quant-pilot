@@ -7,7 +7,9 @@ from datetime import date, timedelta
 import pandas as pd
 
 from schemas.market import KlineBar, KlineBasicInfo, KlineRange, KlineResponse
+from services.backtest import STRATEGY_REGISTRY
 from services.quotes import fetch_quote_snapshot, to_tencent_symbol
+from services.signals import generate_signal_series_for_history
 from services.tencent_kline import fetch_kline_page
 
 SYMBOL_PATTERN = re.compile(r"^\d{6}$")
@@ -151,6 +153,7 @@ def get_market_history(symbol: str, range_value: KlineRange = "1M") -> KlineResp
         ma20=_series_to_optional_floats(close.rolling(window=20, min_periods=20).mean()),
         ma60=_series_to_optional_floats(close.rolling(window=60, min_periods=60).mean()),
         rsi14=_series_to_optional_floats(_calculate_rsi(close)),
+        signals=generate_signal_series_for_history(frame, STRATEGY_REGISTRY),
         basic_info=KlineBasicInfo(
             prev_close=float(quote_snapshot["prev_close"]) if quote_snapshot and quote_snapshot.get("prev_close") is not None else None,
             open=float(quote_snapshot["open"]) if quote_snapshot and quote_snapshot.get("open") is not None else None,

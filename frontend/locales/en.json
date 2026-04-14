@@ -119,6 +119,10 @@
         "threeMonths": "3M"
       },
       "retry": "Retry",
+      "signalOverlay": {
+        "label": "Strategy signals",
+        "none": "Off"
+      },
       "stats": {
         "high": "High",
         "low": "Low",
