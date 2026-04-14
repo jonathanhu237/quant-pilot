@@ -139,6 +139,7 @@
     "title": "Strategy Center",
     "subtitle": "Explore built-in quant strategies, configure parameters, and run quick backtests.",
     "runBacktest": "Run backtest",
+    "viewDetail": "View details",
     "configureTitle": "Configure {{name}}",
     "symbolLabel": "A-share symbol",
     "symbolPlaceholder": "600519",
@@ -157,13 +158,15 @@
       "maxDrawdown": "Max Drawdown",
       "winRate": "Win Rate",
       "sharpeRatio": "Sharpe Ratio",
-      "totalTrades": "Total Trades"
+      "totalTrades": "Total Trades",
+      "equityCurve": "Equity curve"
     },
     "errors": {
       "load": "Failed to load strategy metadata.",
       "run": "Failed to run backtest.",
       "invalidSymbol": "Please enter a valid 6-digit A-share symbol.",
-      "invalidParam": "Please enter a valid value for {{param}}."
+      "invalidParam": "Please enter a valid value for {{param}}.",
+      "notFound": "Strategy not found."
     },
     "strategies": {
       "dual_ma": {

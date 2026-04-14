@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 from routers import strategy as strategy_router
-from schemas.strategy import BacktestResult
+from schemas.strategy import BacktestResult, EquityPoint
 
 
 pytestmark = pytest.mark.asyncio
@@ -76,6 +76,10 @@ async def test_backtest_endpoint_returns_mocked_result(
         win_rate=0.55,
         sharpe_ratio=1.42,
         total_trades=7,
+        equity_curve=[
+            EquityPoint(date=date(2024, 1, 1), value=1.0),
+            EquityPoint(date=date(2024, 1, 2), value=1.03),
+        ],
     )
     monkeypatch.setattr(strategy_router, "run_backtest", lambda _payload: expected)
 
@@ -85,7 +89,7 @@ async def test_backtest_endpoint_returns_mocked_result(
     )
 
     assert response.status_code == 200
-    assert response.json() == expected.model_dump()
+    assert response.json() == expected.model_dump(mode="json")
 
 
 async def test_backtest_endpoint_maps_value_error_to_400(

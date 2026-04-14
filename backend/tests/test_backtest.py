@@ -33,6 +33,31 @@ def test_run_backtest_succeeds_with_mocked_history(monkeypatch: pytest.MonkeyPat
     assert result.symbol == "600519"
     assert isinstance(result.annual_return, float)
     assert result.total_trades >= 1
+    assert len(result.equity_curve) == 5
+    for point in result.equity_curve:
+        assert point.date is not None
+        assert isinstance(point.value, float)
+    assert result.equity_curve[0].date == date(2024, 1, 1)
+
+
+def test_run_backtest_equity_curve_dates_match_history(monkeypatch: pytest.MonkeyPatch) -> None:
+    history_dates = [
+        date(2024, 2, 1),
+        date(2024, 2, 2),
+        date(2024, 2, 5),
+        date(2024, 2, 6),
+    ]
+    history = pd.DataFrame(
+        {
+            "date": pd.to_datetime(history_dates),
+            "close": [10.0, 10.5, 11.0, 11.5],
+        }
+    )
+    monkeypatch.setattr(backtest, "fetch_historical_data", lambda *_args: history)
+
+    result = backtest.run_backtest(make_request())
+
+    assert [point.date for point in result.equity_curve] == history_dates
 
 
 def test_run_backtest_raises_for_unknown_strategy() -> None:
@@ -79,6 +104,11 @@ def test_calculate_metrics_returns_zero_values_for_no_signals() -> None:
     assert metrics["total_trades"] == 0
     assert metrics["annual_return"] == pytest.approx(0.0)
     assert metrics["win_rate"] == pytest.approx(0.0)
+    equity_curve = metrics["equity_curve"]
+    assert isinstance(equity_curve, list)
+    assert len(equity_curve) == 3
+    for value in equity_curve:
+        assert value == pytest.approx(1.0)
 
 
 def test_calculate_metrics_counts_winning_round_trip() -> None:
@@ -89,6 +119,9 @@ def test_calculate_metrics_counts_winning_round_trip() -> None:
 
     assert metrics["total_trades"] == 1
     assert metrics["win_rate"] == pytest.approx(1.0)
+    equity_curve = metrics["equity_curve"]
+    assert isinstance(equity_curve, list)
+    assert equity_curve[-1] > 1.0
 
 
 def test_calculate_metrics_counts_losing_round_trip() -> None:

@@ -3,7 +3,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from schemas.strategy import BacktestRequest, BacktestResult, StrategyMeta
+from schemas.strategy import BacktestRequest, BacktestResult, EquityPoint, StrategyMeta
 from services.strategies.base import BaseStrategy
 from services.strategies.dual_ma import DualMAStrategy
 from services.strategies.rsi import RSIStrategy
@@ -62,7 +62,7 @@ def fetch_historical_data(symbol: str, start_date: date, end_date: date) -> pd.D
     return df[["date", "close"]]
 
 
-def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, float | int]:
+def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, object]:
     daily_returns = close.pct_change().fillna(0.0)
     strategy_returns: list[float] = [0.0]
     equity_curve: list[float] = [1.0]
@@ -117,6 +117,7 @@ def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, float |
         "win_rate": win_rate,
         "sharpe_ratio": sharpe_ratio,
         "total_trades": total_trades,
+        "equity_curve": [float(value) for value in equity_curve],
     }
 
 
@@ -129,6 +130,13 @@ def run_backtest(request: BacktestRequest) -> BacktestResult:
     signals = strategy.generate_signals(history).reindex(history.index).fillna(0).astype(int)
     metrics = calculate_metrics(history["close"], signals)
 
+    equity_values = metrics["equity_curve"]
+    assert isinstance(equity_values, list)
+    equity_points = [
+        EquityPoint(date=history["date"].iloc[index].date(), value=float(value))
+        for index, value in enumerate(equity_values)
+    ]
+
     return BacktestResult(
         strategy_id=request.strategy_id,
         symbol=request.symbol,
@@ -137,4 +145,5 @@ def run_backtest(request: BacktestRequest) -> BacktestResult:
         win_rate=float(metrics["win_rate"]),
         sharpe_ratio=float(metrics["sharpe_ratio"]),
         total_trades=int(metrics["total_trades"]),
+        equity_curve=equity_points,
     )

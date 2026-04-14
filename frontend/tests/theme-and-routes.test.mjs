@@ -10,6 +10,8 @@ import {
   MARKET_ADD_SYMBOL_ROUTE,
   MARKET_DETAIL_ROUTE_PATTERN,
   PAPER_TRADING_NEW_TRADE_ROUTE,
+  STRATEGY_DETAIL_ROUTE_PATTERN,
+  getStrategyDetailRoute,
 } from '../lib/routes.ts';
 import {
   getThemePalette,
@@ -289,6 +291,43 @@ test('market detail screen uses pill range selection and wagmi charts with 1M de
   assert.match(sourceText, /from 'react-native-wagmi-charts'/);
   assert.match(sourceText, /<PillSelector/);
   assert.match(sourceText, /useState<KlineRange>\('1M'\)/);
+});
+
+test('strategy detail route pattern and helper are exported', () => {
+  assert.equal(STRATEGY_DETAIL_ROUTE_PATTERN, '/(tabs)/strategy/[id]');
+  assert.equal(typeof getStrategyDetailRoute, 'function');
+  const routesSource = readFileSync(new URL('../lib/routes.ts', import.meta.url), 'utf8');
+  assert.match(routesSource, /STRATEGY_DETAIL_ROUTE_PATTERN\s*=\s*'\/\(tabs\)\/strategy\/\[id\]'/);
+  assert.match(routesSource, /export function getStrategyDetailRoute/);
+});
+
+test('strategy detail route file exists and is registered in the strategy stack layout', () => {
+  const detailFile = new URL('../app/(tabs)/strategy/[id].tsx', import.meta.url);
+  const layoutSource = readFileSync(
+    new URL('../app/(tabs)/strategy/_layout.tsx', import.meta.url),
+    'utf8'
+  );
+  assert.equal(existsSync(detailFile), true, 'strategy detail route file should exist');
+  assert.match(layoutSource, /<Stack\.Screen\s+name="\[id\]"/);
+});
+
+test('strategy list rows navigate to the strategy detail route when pressed', () => {
+  const sourceText = readFileSync(
+    new URL('../app/(tabs)/strategy/index.tsx', import.meta.url),
+    'utf8'
+  );
+  assert.match(sourceText, /getStrategyDetailRoute\(/);
+  assert.match(sourceText, /router\.push\(/);
+});
+
+test('strategy detail screen wires up wagmi LineChart against the equity curve', () => {
+  const sourceText = readFileSync(
+    new URL('../app/(tabs)/strategy/[id].tsx', import.meta.url),
+    'utf8'
+  );
+  assert.match(sourceText, /from 'react-native-wagmi-charts'/);
+  assert.match(sourceText, /LineChart/);
+  assert.match(sourceText, /result\.equity_curve/);
 });
 
 test('home signal rows keep the signal-history tap target stretched across the leading column', () => {

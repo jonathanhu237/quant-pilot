@@ -60,6 +60,11 @@ export type BacktestRequest = {
   params: Record<string, number>;
 };
 
+export type EquityPoint = {
+  date: string;
+  value: number;
+};
+
 export type BacktestResult = {
   strategy_id: string;
   symbol: string;
@@ -68,6 +73,7 @@ export type BacktestResult = {
   win_rate: number;
   sharpe_ratio: number;
   total_trades: number;
+  equity_curve: EquityPoint[];
 };
 
 export type TradingPosition = {

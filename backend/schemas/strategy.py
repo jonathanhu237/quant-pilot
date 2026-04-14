@@ -42,6 +42,11 @@ class BacktestRequest(BaseModel):
         return self
 
 
+class EquityPoint(BaseModel):
+    date: date
+    value: float
+
+
 class BacktestResult(BaseModel):
     strategy_id: str
     symbol: str
@@ -50,3 +55,4 @@ class BacktestResult(BaseModel):
     win_rate: float
     sharpe_ratio: float
     total_trades: int
+    equity_curve: list[EquityPoint]

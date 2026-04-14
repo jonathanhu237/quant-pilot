@@ -139,6 +139,7 @@
     "title": "策略中心",
     "subtitle": "查看内置量化策略、配置参数，并快速运行回测。",
     "runBacktest": "运行回测",
+    "viewDetail": "查看详情",
     "configureTitle": "配置 {{name}}",
     "symbolLabel": "股票代码",
     "symbolPlaceholder": "600519",
@@ -157,13 +158,15 @@
       "maxDrawdown": "最大回撤",
       "winRate": "胜率",
       "sharpeRatio": "夏普比率",
-      "totalTrades": "总交易次数"
+      "totalTrades": "总交易次数",
+      "equityCurve": "权益曲线"
     },
     "errors": {
       "load": "加载策略元数据失败。",
       "run": "运行回测失败。",
       "invalidSymbol": "请输入有效的 6 位 A 股代码。",
-      "invalidParam": "请为 {{param}} 输入有效参数值。"
+      "invalidParam": "请为 {{param}} 输入有效参数值。",
+      "notFound": "未找到策略。"
     },
     "strategies": {
       "dual_ma": {

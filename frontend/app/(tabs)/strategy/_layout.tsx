@@ -11,6 +11,7 @@ export default function StrategyStackLayout() {
   return (
     <Stack screenOptions={getThemedStackOptions(isDark, true)}>
       <Stack.Screen name="index" options={{ title: t('strategy.title') }} />
+      <Stack.Screen name="[id]" options={{ headerLargeTitle: false, title: '' }} />
     </Stack>
   );
 }
