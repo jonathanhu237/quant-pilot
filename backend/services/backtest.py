@@ -3,7 +3,13 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from schemas.strategy import BacktestRequest, BacktestResult, EquityPoint, StrategyMeta
+from schemas.strategy import (
+    BacktestRequest,
+    BacktestResult,
+    EquityPoint,
+    StrategyMeta,
+    TradeRecord,
+)
 from services.strategies.base import BaseStrategy
 from services.strategies.dual_ma import DualMAStrategy
 from services.strategies.rsi import RSIStrategy
@@ -69,8 +75,10 @@ def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, object]
 
     position = 0
     entry_price: float | None = None
+    entry_index: int | None = None
     winning_trades = 0
     total_trades = 0
+    trades: list[dict[str, object]] = []
 
     for index in range(1, len(close)):
         daily_return = float(daily_returns.iloc[index]) * position
@@ -83,18 +91,42 @@ def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, object]
         if signal == 1 and position == 0:
             position = 1
             entry_price = price
+            entry_index = index
         elif signal == -1 and position == 1:
-            if entry_price is not None:
+            if entry_price is not None and entry_index is not None:
                 total_trades += 1
-                if (price / entry_price) - 1 > 0:
+                return_pct = (price / entry_price) - 1
+                if return_pct > 0:
                     winning_trades += 1
+                trades.append(
+                    {
+                        "entry_index": entry_index,
+                        "exit_index": index,
+                        "entry_price": entry_price,
+                        "exit_price": price,
+                        "return_pct": float(return_pct),
+                    }
+                )
             position = 0
             entry_price = None
+            entry_index = None
 
-    if position == 1 and entry_price is not None:
+    if position == 1 and entry_price is not None and entry_index is not None:
         total_trades += 1
-        if (float(close.iloc[-1]) / entry_price) - 1 > 0:
+        last_index = len(close) - 1
+        last_price = float(close.iloc[-1])
+        return_pct = (last_price / entry_price) - 1
+        if return_pct > 0:
             winning_trades += 1
+        trades.append(
+            {
+                "entry_index": entry_index,
+                "exit_index": last_index,
+                "entry_price": entry_price,
+                "exit_price": last_price,
+                "return_pct": float(return_pct),
+            }
+        )
 
     equity = pd.Series(equity_curve)
     running_max = equity.cummax()
@@ -118,6 +150,7 @@ def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, object]
         "sharpe_ratio": sharpe_ratio,
         "total_trades": total_trades,
         "equity_curve": [float(value) for value in equity_curve],
+        "trades": trades,
     }
 
 
@@ -137,6 +170,19 @@ def run_backtest(request: BacktestRequest) -> BacktestResult:
         for index, value in enumerate(equity_values)
     ]
 
+    raw_trades = metrics["trades"]
+    assert isinstance(raw_trades, list)
+    trade_records = [
+        TradeRecord(
+            entry_date=history["date"].iloc[int(trade["entry_index"])].date(),
+            exit_date=history["date"].iloc[int(trade["exit_index"])].date(),
+            entry_price=float(trade["entry_price"]),
+            exit_price=float(trade["exit_price"]),
+            return_pct=float(trade["return_pct"]),
+        )
+        for trade in raw_trades
+    ]
+
     return BacktestResult(
         strategy_id=request.strategy_id,
         symbol=request.symbol,
@@ -146,4 +192,5 @@ def run_backtest(request: BacktestRequest) -> BacktestResult:
         sharpe_ratio=float(metrics["sharpe_ratio"]),
         total_trades=int(metrics["total_trades"]),
         equity_curve=equity_points,
+        trades=trade_records,
     )

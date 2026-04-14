@@ -65,6 +65,14 @@ export type EquityPoint = {
   value: number;
 };
 
+export type BacktestTradeRecord = {
+  entry_date: string;
+  exit_date: string;
+  entry_price: number;
+  exit_price: number;
+  return_pct: number;
+};
+
 export type BacktestResult = {
   strategy_id: string;
   symbol: string;
@@ -74,6 +82,7 @@ export type BacktestResult = {
   sharpe_ratio: number;
   total_trades: number;
   equity_curve: EquityPoint[];
+  trades: BacktestTradeRecord[];
 };
 
 export type TradingPosition = {

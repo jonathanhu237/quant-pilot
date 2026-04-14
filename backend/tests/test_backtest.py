@@ -38,6 +38,11 @@ def test_run_backtest_succeeds_with_mocked_history(monkeypatch: pytest.MonkeyPat
         assert point.date is not None
         assert isinstance(point.value, float)
     assert result.equity_curve[0].date == date(2024, 1, 1)
+    assert isinstance(result.trades, list)
+    for record in result.trades:
+        assert record.entry_date is not None
+        assert record.exit_date is not None
+        assert isinstance(record.return_pct, float)
 
 
 def test_run_backtest_equity_curve_dates_match_history(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -122,6 +127,15 @@ def test_calculate_metrics_counts_winning_round_trip() -> None:
     equity_curve = metrics["equity_curve"]
     assert isinstance(equity_curve, list)
     assert equity_curve[-1] > 1.0
+    trades = metrics["trades"]
+    assert isinstance(trades, list)
+    assert len(trades) == 1
+    trade = trades[0]
+    assert trade["entry_index"] == 1
+    assert trade["exit_index"] == 3
+    assert trade["entry_price"] == pytest.approx(11.0)
+    assert trade["exit_price"] == pytest.approx(14.0)
+    assert trade["return_pct"] > 0.0
 
 
 def test_calculate_metrics_counts_losing_round_trip() -> None:

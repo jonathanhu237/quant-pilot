@@ -394,6 +394,57 @@ export default function StrategyDetailScreen() {
                 </SectionCard>
               </Animated.View>
             ) : null}
+
+            {result ? (
+              <Animated.View
+                entering={reducedMotion ? undefined : FadeIn.duration(240).delay(60)}
+                exiting={reducedMotion ? undefined : FadeOut.duration(180)}>
+                <SectionCard bodyClassName="px-card-x py-card-y" title={t('strategy.tradesTitle')}>
+                  {result.trades.length === 0 ? (
+                    <Body className="py-4 text-center" tone="secondary">
+                      {t('strategy.tradesEmpty')}
+                    </Body>
+                  ) : (
+                    <View className="gap-3">
+                      {result.trades.map((trade, index) => (
+                        <View
+                          key={`${trade.entry_date}-${trade.exit_date}-${index}`}
+                          className={
+                            index === 0
+                              ? 'pb-3'
+                              : 'border-t border-divider pt-3 pb-3'
+                          }>
+                          <View className="flex-row items-center justify-between">
+                            <View className="gap-1">
+                              <Label tone="secondary">{t('strategy.trade.entry')}</Label>
+                              <Body weight="semibold">{trade.entry_date}</Body>
+                              <NumericText className="text-label text-secondary">
+                                {trade.entry_price.toFixed(2)}
+                              </NumericText>
+                            </View>
+                            <View className="items-end gap-1">
+                              <Label tone="secondary">{t('strategy.trade.exit')}</Label>
+                              <Body weight="semibold">{trade.exit_date}</Body>
+                              <NumericText className="text-label text-secondary">
+                                {trade.exit_price.toFixed(2)}
+                              </NumericText>
+                            </View>
+                          </View>
+                          <View className="mt-3 flex-row items-center justify-between">
+                            <Label tone="secondary">{t('strategy.trade.return')}</Label>
+                            <NumericText
+                              className="text-body font-semibold"
+                              toneValue={trade.return_pct}>
+                              {formatPercent(trade.return_pct)}
+                            </NumericText>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </SectionCard>
+              </Animated.View>
+            ) : null}
           </>
         )}
       </ScrollView>

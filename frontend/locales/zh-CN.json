@@ -161,6 +161,13 @@
       "totalTrades": "总交易次数",
       "equityCurve": "权益曲线"
     },
+    "tradesTitle": "成交明细",
+    "tradesEmpty": "该区间内没有完整的买卖记录。",
+    "trade": {
+      "entry": "入场",
+      "exit": "出场",
+      "return": "收益"
+    },
     "errors": {
       "load": "加载策略元数据失败。",
       "run": "运行回测失败。",

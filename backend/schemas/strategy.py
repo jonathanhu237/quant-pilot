@@ -47,6 +47,14 @@ class EquityPoint(BaseModel):
     value: float
 
 
+class TradeRecord(BaseModel):
+    entry_date: date
+    exit_date: date
+    entry_price: float
+    exit_price: float
+    return_pct: float
+
+
 class BacktestResult(BaseModel):
     strategy_id: str
     symbol: str
@@ -56,3 +64,4 @@ class BacktestResult(BaseModel):
     sharpe_ratio: float
     total_trades: int
     equity_curve: list[EquityPoint]
+    trades: list[TradeRecord]

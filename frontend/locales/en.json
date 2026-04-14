@@ -161,6 +161,13 @@
       "totalTrades": "Total Trades",
       "equityCurve": "Equity curve"
     },
+    "tradesTitle": "Trade log",
+    "tradesEmpty": "No closed trades in this window.",
+    "trade": {
+      "entry": "Entry",
+      "exit": "Exit",
+      "return": "Return"
+    },
     "errors": {
       "load": "Failed to load strategy metadata.",
       "run": "Failed to run backtest.",
