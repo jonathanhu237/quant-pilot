@@ -3,3 +3,4 @@ backend/.env
 *.pyc
 .pnpm-store/
 .claude/
+.superpowers/
