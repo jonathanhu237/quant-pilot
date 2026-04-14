@@ -45,6 +45,13 @@ export default function MarketStackLayout() {
         name="add-symbol"
         options={getThemedSheetOptions(isDark, t('market.modalTitle'))}
       />
+      <Stack.Screen
+        name="[symbol]"
+        options={{
+          headerLargeTitle: false,
+          title: '',
+        }}
+      />
     </Stack>
   );
 }

@@ -1,15 +1,13 @@
-import json
-import re
 from datetime import date
 
 import numpy as np
 import pandas as pd
-import requests
 
 from schemas.strategy import BacktestRequest, BacktestResult, StrategyMeta
 from services.strategies.base import BaseStrategy
 from services.strategies.dual_ma import DualMAStrategy
 from services.strategies.rsi import RSIStrategy
+from services.tencent_kline import fetch_kline_page as _fetch_kline_page
 
 STRATEGY_REGISTRY: dict[str, type[BaseStrategy]] = {
     DualMAStrategy.strategy_id: DualMAStrategy,
@@ -26,26 +24,6 @@ def get_strategy_class(strategy_id: str) -> type[BaseStrategy]:
     if strategy_class is None:
         raise ValueError("Strategy not found")
     return strategy_class
-
-
-def _fetch_kline_page(
-    full_symbol: str, start_date: date, end_date: date
-) -> list[list[str]]:
-    """Fetch one page (up to 640 rows) of front-adjusted daily kline data."""
-    url = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get"
-    params = {
-        "_var": "kline_data",
-        "param": f"{full_symbol},day,{start_date.strftime('%Y-%m-%d')},{end_date.strftime('%Y-%m-%d')},640,qfq",
-    }
-    response = requests.get(url, params=params, timeout=30)
-    response.raise_for_status()
-    json_str = re.sub(r"^[^=]+=", "", response.text).strip()
-    payload = json.loads(json_str)
-    rows = payload["data"][full_symbol].get("qfqday", [])
-    # Some rows (ex-dividend days) have a 7th dict element — keep only first 6
-    return [r[:6] for r in rows if len(r) >= 6]
-
-
 def fetch_historical_data(symbol: str, start_date: date, end_date: date) -> pd.DataFrame:
     from datetime import timedelta
 

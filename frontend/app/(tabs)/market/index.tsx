@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { memo, useCallback, useDeferredValue, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import {
@@ -21,6 +22,7 @@ import { ListRow } from '@/components/ui/list-row';
 import { SkeletonBlock } from '@/components/skeleton-block';
 import { getQuotes, getWatchlist, removeFromWatchlist } from '@/lib/api';
 import { setMarketSearchQuery, useMarketSearchQuery } from '@/lib/market-search';
+import { getMarketDetailRoute } from '@/lib/routes';
 import { useAppTheme } from '@/lib/theme-context';
 
 type MarketRowData = {
@@ -79,6 +81,9 @@ const MarketListRow = memo(function MarketListRow({
         align="center"
         className="gap-3"
         isFirst={index === 0}
+        onPress={() => {
+          router.push(getMarketDetailRoute(item.symbol) as never);
+        }}
         leading={
           <View className="gap-1">
             <Heading className="text-body">{item.name}</Heading>
@@ -99,7 +104,8 @@ const MarketListRow = memo(function MarketListRow({
             </View>
             <Button
               accessibilityLabel={deleteAccessibilityLabel}
-              onPress={() => {
+              onPress={(event) => {
+                event.stopPropagation();
                 onDelete(item.symbol);
               }}
               size="sm"

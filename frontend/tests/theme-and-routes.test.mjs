@@ -8,6 +8,7 @@ import {
   HOME_NEW_TRADE_ROUTE,
   HOME_SIGNAL_HISTORY_ROUTE,
   MARKET_ADD_SYMBOL_ROUTE,
+  MARKET_DETAIL_ROUTE_PATTERN,
   PAPER_TRADING_NEW_TRADE_ROUTE,
 } from '../lib/routes.ts';
 import {
@@ -120,6 +121,7 @@ test('theme helpers expose dark-first palette and toggle deterministically', () 
 
 test('modal and sheet routes are absolute and unambiguous', () => {
   assert.equal(MARKET_ADD_SYMBOL_ROUTE, '/(tabs)/market/add-symbol');
+  assert.equal(MARKET_DETAIL_ROUTE_PATTERN, '/(tabs)/market/[symbol]');
   assert.equal(PAPER_TRADING_NEW_TRADE_ROUTE, '/(tabs)/paper-trading/new-trade');
   assert.equal(HOME_SIGNAL_HISTORY_ROUTE, '/(tabs)/(home)/signal-history');
   assert.equal(HOME_NEW_TRADE_ROUTE, '/(tabs)/(home)/new-trade');
@@ -155,6 +157,13 @@ test('root layout keeps the themed wrapper in the native tree for large-title re
 
   assert.match(rootLayoutSource, /collapsable=\{false\}/);
   assert.match(rootLayoutSource, /style=\{\[\{ flex: 1 \}, themeVars\]\}/);
+});
+
+test('root layout mounts GestureHandlerRootView for gesture-driven chart screens', () => {
+  const rootLayoutSource = readFileSync(new URL('../app/_layout.tsx', import.meta.url), 'utf8');
+
+  assert.match(rootLayoutSource, /import \{ GestureHandlerRootView \} from 'react-native-gesture-handler'/);
+  assert.match(rootLayoutSource, /<GestureHandlerRootView style=\{\{ flex: 1 \}\}>/);
 });
 
 test('theme variables expose semantic non-color tokens for primitives', () => {
@@ -257,6 +266,29 @@ test('tab header actions use one secondary-button chrome language across tabs', 
   assert.match(marketLayout, /color=\{palette\.accent\}/);
   assert.match(paperLayout, /variant="secondary"/);
   assert.doesNotMatch(paperLayout, /size="sm"/);
+});
+
+test('market detail route file exists and is registered in the market stack layout', () => {
+  const detailFile = new URL('../app/(tabs)/market/[symbol].tsx', import.meta.url);
+  const layoutSource = readFileSync(new URL('../app/(tabs)/market/_layout.tsx', import.meta.url), 'utf8');
+
+  assert.equal(existsSync(detailFile), true, 'market detail route file should exist');
+  assert.match(layoutSource, /<Stack\.Screen\s+name="\[symbol\]"/);
+});
+
+test('market list rows navigate to the stock detail route when pressed', () => {
+  const sourceText = readFileSync(new URL('../app/(tabs)/market/index.tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /onPress=\{\(\)\s*=>\s*\{/);
+  assert.match(sourceText, /getMarketDetailRoute\(item\.symbol\)/);
+});
+
+test('market detail screen uses pill range selection and wagmi charts with 1M default', () => {
+  const sourceText = readFileSync(new URL('../app/(tabs)/market/[symbol].tsx', import.meta.url), 'utf8');
+
+  assert.match(sourceText, /from 'react-native-wagmi-charts'/);
+  assert.match(sourceText, /<PillSelector/);
+  assert.match(sourceText, /useState<KlineRange>\('1M'\)/);
 });
 
 test('home signal rows keep the signal-history tap target stretched across the leading column', () => {

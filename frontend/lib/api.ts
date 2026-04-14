@@ -6,6 +6,36 @@ export type StockQuote = {
   change_amount: number;
 };
 
+export type KlineRange = '1M' | '3M' | '6M' | '1Y' | 'ALL';
+
+export type KlineBar = {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
+export type KlineBasicInfo = {
+  prev_close: number | null;
+  open: number | null;
+  high: number | null;
+  low: number | null;
+};
+
+export type KlineResponse = {
+  symbol: string;
+  name: string;
+  range: KlineRange;
+  bars: KlineBar[];
+  ma5: Array<number | null>;
+  ma20: Array<number | null>;
+  ma60: Array<number | null>;
+  rsi14: Array<number | null>;
+  basic_info: KlineBasicInfo;
+};
+
 export type StrategyParameterDefinition = {
   name: string;
   type: 'integer' | 'float';
@@ -221,6 +251,11 @@ export async function getQuotes(symbols: string[]): Promise<StockQuote[]> {
 
   const query = encodeURIComponent(symbols.join(','));
   return request<StockQuote[]>(`/api/market/quotes?symbols=${query}`);
+}
+
+export async function getKline(symbol: string, range: KlineRange): Promise<KlineResponse> {
+  const query = encodeURIComponent(range);
+  return request<KlineResponse>(`/api/market/${encodeURIComponent(symbol)}/kline?range=${query}`);
 }
 
 export async function getStrategies(): Promise<StrategyMeta[]> {

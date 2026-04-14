@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router/stack';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import * as SystemUI from 'expo-system-ui';
 import { vars } from 'nativewind';
@@ -75,29 +76,31 @@ export default function RootLayout() {
   const themeVars = vars(getThemeVariables(themeMode));
 
   return (
-    <AppThemeProvider
-      value={{
-        isDark,
-        palette,
-        setThemeMode,
-        themeMode,
-        toggleTheme,
-      }}>
-      <View collapsable={false} style={[{ flex: 1 }, themeVars]}>
-        <Stack
-          screenOptions={{
-            contentStyle: {
-              backgroundColor: palette.background,
-            },
-          }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: 'modal', title: t('modal.title') }}
-          />
-        </Stack>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-      </View>
-    </AppThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppThemeProvider
+        value={{
+          isDark,
+          palette,
+          setThemeMode,
+          themeMode,
+          toggleTheme,
+        }}>
+        <View collapsable={false} style={[{ flex: 1 }, themeVars]}>
+          <Stack
+            screenOptions={{
+              contentStyle: {
+                backgroundColor: palette.background,
+              },
+            }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: 'modal', title: t('modal.title') }}
+            />
+          </Stack>
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+        </View>
+      </AppThemeProvider>
+    </GestureHandlerRootView>
   );
 }

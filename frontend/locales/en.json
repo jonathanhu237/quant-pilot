@@ -19,7 +19,9 @@
       "addSymbol": "Add symbol to watchlist",
       "deleteSymbol": "Delete {{name}} {{symbol}} from watchlist",
       "cancelAddSymbol": "Cancel adding symbol",
-      "confirmAddSymbol": "Add symbol to watchlist"
+      "confirmAddSymbol": "Add symbol to watchlist",
+      "addDetailSymbol": "Add {{symbol}} to watchlist",
+      "removeDetailSymbol": "Remove {{symbol}} from watchlist"
     },
     "paperTrading": {
       "openTradeSheet": "Open trade sheet",
@@ -99,12 +101,38 @@
     "adding": "Adding...",
     "delete": "Delete",
     "quoteUnavailable": "Quote unavailable",
+    "detail": {
+      "basicInfoTitle": "Basic Info",
+      "chartTitle": "Price Chart",
+      "legend": {
+        "ma20": "MA20",
+        "ma5": "MA5",
+        "ma60": "MA60",
+        "rsi14": "RSI14"
+      },
+      "priceUnavailable": "Live price unavailable",
+      "range": {
+        "all": "ALL",
+        "oneMonth": "1M",
+        "oneYear": "1Y",
+        "sixMonths": "6M",
+        "threeMonths": "3M"
+      },
+      "retry": "Retry",
+      "stats": {
+        "high": "High",
+        "low": "Low",
+        "open": "Open",
+        "prevClose": "Prev Close"
+      }
+    },
     "errors": {
       "load": "Failed to load market data.",
       "refresh": "Failed to refresh market data.",
       "quotesUnavailable": "Live quotes are temporarily unavailable. Showing your watchlist without prices.",
       "add": "Failed to add symbol.",
-      "delete": "Failed to delete symbol."
+      "delete": "Failed to delete symbol.",
+      "detailLoad": "Failed to load stock detail."
     }
   },
   "strategy": {

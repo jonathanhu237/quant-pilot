@@ -19,7 +19,9 @@
       "addSymbol": "添加股票到自选股",
       "deleteSymbol": "从自选股删除 {{name}} {{symbol}}",
       "cancelAddSymbol": "取消添加股票",
-      "confirmAddSymbol": "添加股票到自选股"
+      "confirmAddSymbol": "添加股票到自选股",
+      "addDetailSymbol": "将 {{symbol}} 添加到自选股",
+      "removeDetailSymbol": "将 {{symbol}} 从自选股移出"
     },
     "paperTrading": {
       "openTradeSheet": "打开交易面板",
@@ -99,12 +101,38 @@
     "adding": "添加中...",
     "delete": "删除",
     "quoteUnavailable": "暂无行情",
+    "detail": {
+      "basicInfoTitle": "基础信息",
+      "chartTitle": "价格走势",
+      "legend": {
+        "ma20": "MA20",
+        "ma5": "MA5",
+        "ma60": "MA60",
+        "rsi14": "RSI14"
+      },
+      "priceUnavailable": "实时价格暂不可用",
+      "range": {
+        "all": "全部",
+        "oneMonth": "1个月",
+        "oneYear": "1年",
+        "sixMonths": "6个月",
+        "threeMonths": "3个月"
+      },
+      "retry": "重试",
+      "stats": {
+        "high": "最高",
+        "low": "最低",
+        "open": "今开",
+        "prevClose": "昨收"
+      }
+    },
     "errors": {
       "load": "加载行情数据失败。",
       "refresh": "刷新行情数据失败。",
       "quotesUnavailable": "实时行情暂时不可用，当前仅展示自选股代码。",
       "add": "添加股票失败。",
-      "delete": "删除股票失败。"
+      "delete": "删除股票失败。",
+      "detailLoad": "加载个股详情失败。"
     }
   },
   "strategy": {
