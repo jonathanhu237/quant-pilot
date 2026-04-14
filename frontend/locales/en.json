@@ -196,6 +196,32 @@
           "oversold": "Oversold threshold",
           "overbought": "Overbought threshold"
         }
+      },
+      "macd": {
+        "name": "MACD",
+        "description": "Buy when the MACD line crosses above its signal line, and sell on the reverse crossover.",
+        "params": {
+          "fast_period": "Fast EMA period",
+          "slow_period": "Slow EMA period",
+          "signal_period": "Signal period"
+        }
+      },
+      "kdj": {
+        "name": "KDJ",
+        "description": "Buy when K crosses above D inside the oversold zone, and sell when K crosses below D inside the overbought zone.",
+        "params": {
+          "period": "KDJ period",
+          "oversold": "Oversold threshold",
+          "overbought": "Overbought threshold"
+        }
+      },
+      "bollinger": {
+        "name": "Bollinger Bands Reversion",
+        "description": "Buy when the close crosses back above the lower band, and sell when it crosses back below the upper band.",
+        "params": {
+          "period": "Band period",
+          "std_dev": "Standard deviations"
+        }
       }
     }
   },

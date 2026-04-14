@@ -86,8 +86,13 @@ def test_run_backtest_raises_for_short_history(monkeypatch: pytest.MonkeyPatch) 
 def test_list_strategy_metadata_returns_registered_strategies() -> None:
     metadata = backtest.list_strategy_metadata()
 
-    assert len(metadata) == 2
-    assert {strategy.id for strategy in metadata} == {"dual_ma", "rsi"}
+    assert {strategy.id for strategy in metadata} == {
+        "dual_ma",
+        "rsi",
+        "macd",
+        "kdj",
+        "bollinger",
+    }
     assert all(strategy.parameters for strategy in metadata)
 
 

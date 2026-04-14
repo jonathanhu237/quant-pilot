@@ -11,13 +11,19 @@ from schemas.strategy import (
     TradeRecord,
 )
 from services.strategies.base import BaseStrategy
+from services.strategies.bollinger import BollingerBandsStrategy
 from services.strategies.dual_ma import DualMAStrategy
+from services.strategies.kdj import KDJStrategy
+from services.strategies.macd import MACDStrategy
 from services.strategies.rsi import RSIStrategy
 from services.tencent_kline import fetch_kline_page as _fetch_kline_page
 
 STRATEGY_REGISTRY: dict[str, type[BaseStrategy]] = {
     DualMAStrategy.strategy_id: DualMAStrategy,
     RSIStrategy.strategy_id: RSIStrategy,
+    MACDStrategy.strategy_id: MACDStrategy,
+    KDJStrategy.strategy_id: KDJStrategy,
+    BollingerBandsStrategy.strategy_id: BollingerBandsStrategy,
 }
 
 
@@ -59,13 +65,14 @@ def fetch_historical_data(symbol: str, start_date: date, end_date: date) -> pd.D
 
     df = pd.DataFrame(all_rows, columns=["date", "open", "close", "high", "low", "volume"])
     df["date"] = pd.to_datetime(df["date"])
-    df["close"] = pd.to_numeric(df["close"], errors="coerce")
-    df = df.dropna(subset=["close"]).sort_values("date").reset_index(drop=True)
+    for column in ("open", "close", "high", "low"):
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+    df = df.dropna(subset=["close", "high", "low"]).sort_values("date").reset_index(drop=True)
 
     if len(df) < 2:
         raise ValueError("Not enough historical data to run a backtest")
 
-    return df[["date", "close"]]
+    return df[["date", "open", "close", "high", "low"]]
 
 
 def calculate_metrics(close: pd.Series, signals: pd.Series) -> dict[str, object]:

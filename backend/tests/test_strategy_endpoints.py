@@ -31,8 +31,13 @@ async def test_list_strategies_returns_registered_metadata(client: AsyncClient) 
     assert response.status_code == 200
 
     payload = response.json()
-    assert len(payload) == 2
-    assert {strategy["id"] for strategy in payload} == {"dual_ma", "rsi"}
+    assert {strategy["id"] for strategy in payload} == {
+        "dual_ma",
+        "rsi",
+        "macd",
+        "kdj",
+        "bollinger",
+    }
     assert all({"id", "name", "description", "parameters"} <= strategy.keys() for strategy in payload)
 
 

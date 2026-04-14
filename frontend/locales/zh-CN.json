@@ -196,6 +196,32 @@
           "oversold": "超卖阈值",
           "overbought": "超买阈值"
         }
+      },
+      "macd": {
+        "name": "MACD",
+        "description": "MACD 线上穿信号线时买入，下穿时卖出。",
+        "params": {
+          "fast_period": "快线 EMA 周期",
+          "slow_period": "慢线 EMA 周期",
+          "signal_period": "信号线周期"
+        }
+      },
+      "kdj": {
+        "name": "KDJ",
+        "description": "K 线在超卖区域上穿 D 线时买入，在超买区域下穿 D 线时卖出。",
+        "params": {
+          "period": "KDJ 周期",
+          "oversold": "超卖阈值",
+          "overbought": "超买阈值"
+        }
+      },
+      "bollinger": {
+        "name": "布林带回归",
+        "description": "收盘价回升穿越下轨时买入，跌破上轨时卖出。",
+        "params": {
+          "period": "布林带周期",
+          "std_dev": "标准差倍数"
+        }
       }
     }
   },
